@@ -1,8 +1,10 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-// Paths that are accessible without authentication
-const PUBLIC_PATHS = ['/login', '/register', '/auth', '/'];
+// Paths that are accessible without authentication. API routes handle their
+// own auth (session cookie, bearer token, cron secret), so the proxy never
+// redirects them.
+const PUBLIC_PATHS = ['/login', '/register', '/auth', '/api', '/'];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some(
