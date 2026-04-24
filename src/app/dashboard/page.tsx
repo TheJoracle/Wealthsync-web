@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { DeleteAssetButton } from '@/components/delete-asset-button';
 
 export const metadata = {
   title: 'Dashboard — WealthSync',
@@ -54,11 +56,19 @@ export default async function DashboardPage() {
         </section>
 
         <section className="mt-8">
-          <h2 className="mb-4 text-xl font-semibold">Assets</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Assets</h2>
+            <Link
+              href="/assets/new"
+              className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-accent)] transition hover:brightness-110"
+            >
+              + Nieuw asset
+            </Link>
+          </div>
           {!assets || assets.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-card)] p-8 text-center">
               <p className="text-[var(--text-secondary)]">
-                Nog geen assets. De migratie van je portfolio uit de oude app volgt zo.
+                Nog geen assets. Klik op <strong>Nieuw asset</strong> om er een toe te voegen.
               </p>
             </div>
           ) : (
@@ -68,18 +78,29 @@ export default async function DashboardPage() {
                   key={asset.id}
                   className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-4"
                 >
-                  <div>
-                    <p className="font-semibold">{asset.name}</p>
-                    <p className="text-sm text-[var(--text-secondary)]">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">{asset.name}</p>
+                    <p className="truncate text-sm text-[var(--text-secondary)]">
                       {asset.symbol} · {asset.type} · {Number(asset.amount).toLocaleString('nl-NL')}
                     </p>
                   </div>
-                  <p className="text-lg font-semibold">
-                    €{Number(asset.value).toLocaleString('nl-NL', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
+                  <div className="flex shrink-0 items-center gap-4">
+                    <p className="text-lg font-semibold">
+                      €{Number(asset.value).toLocaleString('nl-NL', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/assets/${asset.id}/edit`}
+                        className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                      >
+                        Bewerk
+                      </Link>
+                      <DeleteAssetButton id={asset.id} name={asset.name} />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
