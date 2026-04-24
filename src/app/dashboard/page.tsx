@@ -49,6 +49,12 @@ export default async function DashboardPage() {
             WealthSync
           </h1>
           <div className="flex items-center gap-3">
+            <Link
+              href="/connections"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+            >
+              Connections
+            </Link>
             <span className="text-sm text-[var(--text-secondary)]">{user.email}</span>
             <ThemeToggle />
             <form action="/logout" method="post">
