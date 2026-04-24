@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ASSET_TYPES } from '@/app/assets/actions';
+import { ASSET_TYPES } from '@/app/assets/types';
 
 type AssetFormValues = {
   name: string;

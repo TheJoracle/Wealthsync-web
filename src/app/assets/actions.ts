@@ -3,16 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-
-export const ASSET_TYPES = [
-  'Stock',
-  'ETF',
-  'Crypto',
-  'Commodity',
-  'Physical Metal',
-] as const;
-
-type AssetType = (typeof ASSET_TYPES)[number];
+import { ASSET_TYPES, type AssetType } from '@/app/assets/types';
 
 type AssetInput = {
   name: string;
