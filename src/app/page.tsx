@@ -1,6 +1,18 @@
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import { ThemeToggle } from '@/components/theme-toggle';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/dashboard');
+  }
+
   return (
     <div className="flex flex-col flex-1 min-h-screen">
       <header className="border-b border-[var(--border)] px-6 py-4">
@@ -18,14 +30,21 @@ export default function Home() {
             Track your portfolio
           </h2>
           <p className="mt-6 text-lg text-[var(--text-secondary)]">
-            Next.js + Supabase rewrite — under construction.
+            Eén dashboard voor al je assets — aandelen, ETFs, crypto en edelmetalen.
           </p>
-          <div className="mt-10 flex flex-col items-center gap-4">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-4">
-              <p className="text-sm text-[var(--text-muted)]">
-                Dark/light toggle works — click the icon top-right.
-              </p>
-            </div>
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/register"
+              className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-6 py-3 font-semibold text-[var(--on-accent)] transition hover:brightness-110"
+            >
+              Account aanmaken
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-lg border border-[var(--border)] px-6 py-3 font-semibold text-[var(--text-primary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              Inloggen
+            </Link>
           </div>
         </div>
       </main>
