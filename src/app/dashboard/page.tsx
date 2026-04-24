@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { DeleteAssetButton } from '@/components/delete-asset-button';
+import { PortfolioHistoryChart } from '@/components/portfolio-history-chart';
+import { AllocationChart } from '@/components/allocation-chart';
 
 export const metadata = {
   title: 'Dashboard — WealthSync',
@@ -18,12 +20,26 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const { data: assets } = await supabase
-    .from('assets')
-    .select('id, name, symbol, type, amount, value')
-    .order('value', { ascending: false });
+  const [{ data: assets }, { data: history }] = await Promise.all([
+    supabase
+      .from('assets')
+      .select('id, name, symbol, type, amount, value')
+      .order('value', { ascending: false }),
+    supabase
+      .from('portfolio_history')
+      .select('date, total_value')
+      .order('date', { ascending: true }),
+  ]);
 
   const totalValue = (assets ?? []).reduce((sum, a) => sum + Number(a.value), 0);
+  const historyPoints = (history ?? []).map((h) => ({
+    date: h.date,
+    total_value: Number(h.total_value),
+  }));
+  const allocationRows = (assets ?? []).map((a) => ({
+    type: a.type,
+    value: Number(a.value),
+  }));
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -53,6 +69,11 @@ export default async function DashboardPage() {
           <p className="mt-2 text-5xl font-bold">
             €{totalValue.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
+        </section>
+
+        <section className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
+          <PortfolioHistoryChart data={historyPoints} />
+          <AllocationChart data={allocationRows} />
         </section>
 
         <section className="mt-8">

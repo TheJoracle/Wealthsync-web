@@ -1,0 +1,134 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+
+export type HistoryPoint = {
+  date: string; // YYYY-MM-DD
+  total_value: number;
+};
+
+const RANGES = [
+  { label: '30d', days: 30 },
+  { label: '90d', days: 90 },
+  { label: '1y', days: 365 },
+  { label: 'All', days: Number.POSITIVE_INFINITY },
+] as const;
+
+function fmtEur(n: number) {
+  return `€${n.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}`;
+}
+
+function fmtDate(iso: string) {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y.slice(2)}`;
+}
+
+export function PortfolioHistoryChart({ data }: { data: HistoryPoint[] }) {
+  const [rangeIndex, setRangeIndex] = useState(0);
+  const range = RANGES[rangeIndex];
+
+  const filtered = useMemo(() => {
+    if (range.days === Number.POSITIVE_INFINITY) return data;
+    const cutoff = Date.now() - range.days * 24 * 60 * 60 * 1000;
+    return data.filter((p) => new Date(p.date).getTime() >= cutoff);
+  }, [data, range]);
+
+  if (filtered.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-card)] p-8 text-center text-[var(--text-secondary)]">
+        Nog geen geschiedenis voor deze periode.
+      </div>
+    );
+  }
+
+  const first = filtered[0].total_value;
+  const last = filtered[filtered.length - 1].total_value;
+  const pct = first === 0 ? 0 : ((last - first) / first) * 100;
+  const positive = pct >= 0;
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-semibold">Portfolio-geschiedenis</h3>
+          <p className="text-sm text-[var(--text-secondary)]">
+            {fmtEur(first)} → {fmtEur(last)}{' '}
+            <span className={positive ? 'text-[var(--accent)]' : 'text-[var(--danger)]'}>
+              ({positive ? '+' : ''}
+              {pct.toFixed(1)}%)
+            </span>
+          </p>
+        </div>
+        <div className="flex gap-1 rounded-lg border border-[var(--border)] p-1">
+          {RANGES.map((r, i) => (
+            <button
+              key={r.label}
+              type="button"
+              onClick={() => setRangeIndex(i)}
+              className={`rounded px-3 py-1 text-sm transition ${
+                i === rangeIndex
+                  ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={filtered} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickFormatter={fmtDate}
+              stroke="var(--text-muted)"
+              fontSize={12}
+              minTickGap={32}
+            />
+            <YAxis
+              tickFormatter={(n) => `€${(n / 1000).toFixed(0)}k`}
+              stroke="var(--text-muted)"
+              fontSize={12}
+              width={50}
+            />
+            <Tooltip
+              contentStyle={{
+                background: 'var(--bg-panel)',
+                border: '1px solid var(--border)',
+                borderRadius: '0.5rem',
+                color: 'var(--text-primary)',
+              }}
+              labelFormatter={(label) => fmtDate(String(label))}
+              formatter={(value) => [fmtEur(Number(value)), 'Portfolio']}
+            />
+            <Area
+              type="monotone"
+              dataKey="total_value"
+              stroke="var(--accent)"
+              strokeWidth={2}
+              fill="url(#portfolioGradient)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
