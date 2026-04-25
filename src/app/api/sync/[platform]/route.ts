@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { decrypt } from '@/lib/encryption';
 import { syncTrading212 } from '@/lib/sync/trading212';
+import { syncTrading212Dividends } from '@/lib/sync/trading212-dividends';
 import { syncBitvavo } from '@/lib/sync/bitvavo';
 import { PLATFORMS, type Platform } from '@/app/connections/types';
 
@@ -50,6 +51,18 @@ export async function POST(
         ? await syncTrading212(admin, user.id, credentials)
         : await syncBitvavo(admin, user.id, credentials);
 
+    // Trading 212 dividends are best-effort — don't fail the position sync if
+    // the dividends endpoint chokes (e.g. user didn't enable that scope).
+    let dividends: { inserted?: number; skipped?: number; total?: number; error?: string } = {};
+    if (platform === 'trading212') {
+      try {
+        const d = await syncTrading212Dividends(admin, user.id, credentials);
+        dividends = d;
+      } catch (e) {
+        dividends = { error: e instanceof Error ? e.message : String(e) };
+      }
+    }
+
     await supabase
       .from('api_connections')
       .update({
@@ -62,6 +75,7 @@ export async function POST(
     return NextResponse.json({
       ok: true,
       ...result,
+      dividends,
       durationMs: Date.now() - startedAt,
     });
   } catch (e) {
