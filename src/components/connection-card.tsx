@@ -1,8 +1,28 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { connectPlatform, disconnectPlatform } from '@/app/connections/actions';
-import { PLATFORM_FIELDS, PLATFORM_LABELS, type Platform } from '@/app/connections/types';
+import {
+  PLATFORM_FIELDS,
+  PLATFORM_LABELS,
+  type Platform,
+} from '@/app/connections/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 type Props = {
   platform: Platform;
@@ -38,7 +58,6 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
   }
 
   function onDisconnect() {
-    if (!confirm(`${label} loskoppelen? Je API-key wordt verwijderd.`)) return;
     startTransition(async () => {
       await disconnectPlatform(platform);
     });
@@ -59,125 +78,123 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-semibold">{label}</h3>
-          <p className="text-sm text-[var(--text-secondary)]">
+    <Card>
+      <CardContent className="px-6 py-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold">{label}</h3>
+            <p className="text-sm text-muted-foreground">
+              {connected ? (
+                <>
+                  <span className="text-primary">●</span> Gekoppeld
+                  {lastSync && ` · laatst gesynced ${new Date(lastSync).toLocaleString('nl-NL')}`}
+                </>
+              ) : (
+                <><span className="text-muted-foreground">●</span> Niet gekoppeld</>
+              )}
+            </p>
+            {lastError && (
+              <p className="mt-1 text-sm text-destructive">Laatste fout: {lastError}</p>
+            )}
+          </div>
+          <div className="flex gap-2">
             {connected ? (
               <>
-                <span className="text-[var(--brand)]">●</span> Gekoppeld
-                {lastSync && ` · laatst gesynced ${new Date(lastSync).toLocaleString('nl-NL')}`}
+                <Button onClick={onSync} disabled={syncing || pending} size="lg">
+                  {syncing ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+                  {syncing ? 'Syncing...' : 'Sync nu'}
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm hover:bg-muted"
+                    disabled={pending}
+                  >
+                    <Trash2 className="size-4" />
+                    Loskoppelen
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{label} loskoppelen?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Je versleutelde API-key wordt verwijderd. Je kunt later opnieuw koppelen.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                      <AlertDialogAction onClick={onDisconnect}>Loskoppelen</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </>
             ) : (
-              <><span className="text-[var(--text-muted)]">●</span> Niet gekoppeld</>
+              <Button onClick={() => setOpen(!open)} variant="outline" size="lg">
+                {open ? 'Annuleren' : 'Koppelen'}
+              </Button>
             )}
-          </p>
-          {lastError && (
-            <p className="mt-1 text-sm text-[var(--danger)]">Laatste fout: {lastError}</p>
-          )}
-        </div>
-        <div className="flex gap-2">
-          {connected ? (
-            <>
-              <button
-                type="button"
-                onClick={onSync}
-                disabled={syncing || pending}
-                className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
-              >
-                {syncing ? 'Syncing...' : 'Sync nu'}
-              </button>
-              <button
-                type="button"
-                onClick={onDisconnect}
-                disabled={pending}
-                className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-secondary)] transition hover:border-[var(--danger)] hover:text-[var(--danger)]"
-              >
-                Loskoppelen
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setOpen(!open)}
-              className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-primary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-            >
-              {open ? 'Annuleren' : 'Koppelen'}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {open && !connected && (
-        <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3 border-t border-[var(--border)] pt-4">
-          <input type="hidden" name="platform" value={platform} />
-          <div className="flex flex-col gap-1">
-            <label htmlFor={`${platform}-key`} className="text-sm font-medium text-[var(--text-secondary)]">
-              API key
-            </label>
-            <input
-              id={`${platform}-key`}
-              name="api_key"
-              type="password"
-              required
-              autoComplete="off"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
-            />
           </div>
-          {needsSecret && (
-            <div className="flex flex-col gap-1">
-              <label htmlFor={`${platform}-secret`} className="text-sm font-medium text-[var(--text-secondary)]">
-                API secret
-              </label>
-              <input
-                id={`${platform}-secret`}
-                name="api_secret"
+        </div>
+
+        {open && !connected && (
+          <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
+            <input type="hidden" name="platform" value={platform} />
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={`${platform}-key`}>API key</Label>
+              <Input
+                id={`${platform}-key`}
+                name="api_key"
                 type="password"
                 required
                 autoComplete="off"
-                value={apiSecret}
-                onChange={(e) => setApiSecret(e.target.value)}
-                className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
               />
             </div>
-          )}
-          {platform === 'trading212' && (
-            <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-              <input
-                type="checkbox"
-                name="mode"
-                value="demo"
-                className="h-4 w-4 rounded border-[var(--border)] bg-[var(--bg-panel)]"
-              />
-              Practice / demo account
-            </label>
-          )}
-          {error && (
-            <div className="rounded-lg border border-[var(--danger)] bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
-              {error}
-            </div>
-          )}
-          <button
-            type="submit"
-            disabled={pending}
-            className="self-start rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-5 py-2.5 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
-          >
-            {pending ? '...' : 'Opslaan'}
-          </button>
-          <p className="text-xs text-[var(--text-muted)]">
-            Je key wordt versleuteld opgeslagen (AES-256-GCM). Alleen de server kan 'm ontsleutelen bij syncs.
-          </p>
-        </form>
-      )}
+            {needsSecret && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor={`${platform}-secret`}>API secret</Label>
+                <Input
+                  id={`${platform}-secret`}
+                  name="api_secret"
+                  type="password"
+                  required
+                  autoComplete="off"
+                  value={apiSecret}
+                  onChange={(e) => setApiSecret(e.target.value)}
+                />
+              </div>
+            )}
+            {platform === 'trading212' && (
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  name="mode"
+                  value="demo"
+                  className="size-4 rounded border-input"
+                />
+                Practice / demo account
+              </label>
+            )}
+            {error && (
+              <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+            <Button type="submit" disabled={pending} className="self-start">
+              {pending && <Loader2 className="animate-spin" />}
+              Opslaan
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Je key wordt versleuteld opgeslagen (AES-256-GCM). Alleen de server kan 'm ontsleutelen bij syncs.
+            </p>
+          </form>
+        )}
 
-      {error && connected && (
-        <div className="mt-3 rounded-lg border border-[var(--danger)] bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
-          {error}
-        </div>
-      )}
-    </div>
+        {error && connected && (
+          <div className="mt-3 rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

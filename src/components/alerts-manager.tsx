@@ -2,7 +2,19 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { addAlert, deleteAlert, toggleAlert } from '@/app/alerts/actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type Asset = { id: number; symbol: string; name: string; value: number; amount: number };
 
@@ -35,14 +47,17 @@ export function AlertsManager({
   const [condition, setCondition] = useState<'above' | 'below'>('above');
 
   const selectedAsset = assets.find((a) => a.id === assetId);
-  const currentPrice = selectedAsset && selectedAsset.amount > 0
-    ? selectedAsset.value / selectedAsset.amount
-    : 0;
+  const currentPrice =
+    selectedAsset && selectedAsset.amount > 0
+      ? selectedAsset.value / selectedAsset.amount
+      : 0;
 
   function onAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     const fd = new FormData(event.currentTarget);
+    fd.set('asset_id', String(assetId));
+    fd.set('condition', condition);
     if (selectedAsset) fd.set('symbol', selectedAsset.symbol);
     startTransition(async () => {
       const r = await addAlert(fd);
@@ -53,132 +68,153 @@ export function AlertsManager({
 
   function onDelete(id: number) {
     if (!confirm('Alert verwijderen?')) return;
-    startTransition(async () => { await deleteAlert(id); });
+    startTransition(async () => {
+      await deleteAlert(id);
+    });
   }
 
   function onToggle(id: number, active: boolean) {
-    startTransition(async () => { await toggleAlert(id, active); });
+    startTransition(async () => {
+      await toggleAlert(id, active);
+    });
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
-        <h3 className="text-lg font-semibold">Nieuwe alert</h3>
-        <p className="mt-1 text-sm text-[var(--text-secondary)]">
-          We checken bij elke price-update of de doelprijs is gepasseerd. Notificaties komen later via email.
-        </p>
-        <form onSubmit={onAdd} className="mt-4 grid gap-4 sm:grid-cols-4">
-          <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-            <span className="font-medium text-[var(--text-secondary)]">Asset</span>
-            <select
-              name="asset_id"
-              required
-              value={assetId}
-              onChange={(e) => setAssetId(Number(e.target.value))}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
-            >
-              {assets.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.symbol} — {a.name}
-                </option>
-              ))}
-            </select>
-            {currentPrice > 0 && (
-              <span className="text-xs text-[var(--text-muted)]">
-                Huidige prijs ≈ {fmtEur(currentPrice)}
-              </span>
-            )}
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium text-[var(--text-secondary)]">Conditie</span>
-            <select
-              name="condition"
-              value={condition}
-              onChange={(e) => setCondition(e.target.value as 'above' | 'below')}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
-            >
-              <option value="above">Boven</option>
-              <option value="below">Onder</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium text-[var(--text-secondary)]">Doelprijs (€)</span>
-            <input
-              type="number"
-              step="any"
-              name="target_price"
-              required
-              value={target}
-              onChange={(e) => setTarget(Number(e.target.value))}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
-            />
-          </label>
-          <input type="hidden" name="symbol" value={selectedAsset?.symbol ?? ''} />
-          {error && (
-            <div className="rounded-lg border border-[var(--danger)] bg-[var(--danger)]/10 px-4 py-2 text-sm text-[var(--danger)] sm:col-span-4">
-              {error}
-            </div>
-          )}
-          <button
-            type="submit"
-            disabled={pending || assets.length === 0}
-            className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50 sm:col-span-4 sm:max-w-xs"
-          >
-            {pending ? '...' : '+ Alert toevoegen'}
-          </button>
-        </form>
-      </div>
-
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
-        <h3 className="border-b border-[var(--border)] px-6 py-4 text-lg font-semibold">
-          Actieve alerts ({alerts.filter((a) => a.is_active).length})
-        </h3>
-        {alerts.length === 0 ? (
-          <p className="px-6 py-8 text-center text-sm text-[var(--text-secondary)]">
-            Nog geen alerts. Voeg er hierboven een toe.
+      <Card>
+        <CardHeader>
+          <CardTitle>Nieuwe alert</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            We checken bij elke price-update of de doelprijs is gepasseerd. Notificaties komen later via email.
           </p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-[var(--bg-panel)] text-[var(--text-secondary)]">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Symbool</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Conditie</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide">Doelprijs</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide">Actief</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {alerts.map((a) => (
-                <tr key={a.id} className="border-t border-[var(--border)]">
-                  <td className="px-4 py-3 font-medium">{a.symbol}</td>
-                  <td className="px-4 py-3">{a.condition === 'above' ? 'Boven' : 'Onder'}</td>
-                  <td className="px-4 py-3 text-right">{fmtEur(Number(a.target_price))}</td>
-                  <td className="px-4 py-3 text-center">
-                    <input
-                      type="checkbox"
-                      checked={a.is_active}
-                      onChange={(e) => onToggle(a.id, e.target.checked)}
-                      disabled={pending}
-                      className="h-4 w-4"
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onDelete(a.id)}
-                      disabled={pending}
-                      className="rounded border border-[var(--border)] px-3 py-1 text-xs text-[var(--text-secondary)] hover:border-[var(--danger)] hover:text-[var(--danger)] disabled:opacity-50"
-                    >
-                      Verwijder
-                    </button>
-                  </td>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onAdd} className="grid gap-4 sm:grid-cols-4">
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <Label htmlFor="alert-asset">Asset</Label>
+              <Select
+                value={String(assetId)}
+                onValueChange={(v) => v && setAssetId(Number(v))}
+              >
+                <SelectTrigger id="alert-asset">
+                  <SelectValue placeholder="Kies een asset" />
+                </SelectTrigger>
+                <SelectContent>
+                  {assets.map((a) => (
+                    <SelectItem key={a.id} value={String(a.id)}>
+                      {a.symbol} — {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {currentPrice > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  Huidige prijs ≈ {fmtEur(currentPrice)}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="alert-condition">Conditie</Label>
+              <Select
+                value={condition}
+                onValueChange={(v) => v && setCondition(v as 'above' | 'below')}
+              >
+                <SelectTrigger id="alert-condition">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="above">Boven</SelectItem>
+                  <SelectItem value="below">Onder</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="alert-target">Doelprijs (€)</Label>
+              <Input
+                id="alert-target"
+                type="number"
+                step="any"
+                name="target_price"
+                required
+                value={target}
+                onChange={(e) => setTarget(Number(e.target.value))}
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive sm:col-span-4">
+                {error}
+              </div>
+            )}
+            <Button
+              type="submit"
+              disabled={pending || assets.length === 0}
+              size="lg"
+              className="sm:col-span-4 sm:max-w-xs"
+            >
+              {pending ? <Loader2 className="animate-spin" /> : <Plus />}
+              Alert toevoegen
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Actieve alerts ({alerts.filter((a) => a.is_active).length})</CardTitle>
+        </CardHeader>
+        <CardContent className="px-0">
+          {alerts.length === 0 ? (
+            <p className="px-6 py-4 text-center text-sm text-muted-foreground">
+              Nog geen alerts. Voeg er hierboven een toe.
+            </p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Symbool</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Conditie</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide">Doelprijs</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide">Actief</th>
+                  <th className="px-4 py-3" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {alerts.map((a) => (
+                  <tr key={a.id} className="border-t border-border">
+                    <td className="px-4 py-3 font-medium">{a.symbol}</td>
+                    <td className="px-4 py-3">{a.condition === 'above' ? 'Boven' : 'Onder'}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {fmtEur(Number(a.target_price))}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={a.is_active}
+                        onChange={(e) => onToggle(a.id, e.target.checked)}
+                        disabled={pending}
+                        className="size-4"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Button
+                        type="button"
+                        onClick={() => onDelete(a.id)}
+                        disabled={pending}
+                        variant="ghost"
+                        size="icon-sm"
+                        title="Verwijder"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
