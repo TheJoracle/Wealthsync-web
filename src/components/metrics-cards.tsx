@@ -8,13 +8,7 @@ import {
   totalReturnOnCost,
   type HistoryPoint,
 } from '@/lib/metrics';
-
-const RANGES = [
-  { label: '30d', days: 30 },
-  { label: '90d', days: 90 },
-  { label: '1y', days: 365 },
-  { label: 'All', days: Number.POSITIVE_INFINITY },
-] as const;
+import { DEFAULT_RANGE_INDEX, RANGES } from '@/lib/ranges';
 
 function fmtPct(v: number | null, sign = true): string {
   if (v === null) return '—';
@@ -33,12 +27,12 @@ type Props = {
 };
 
 export function MetricsCards({ history, currentValue, totalInvested }: Props) {
-  const [rangeIndex, setRangeIndex] = useState(0);
+  const [rangeIndex, setRangeIndex] = useState(DEFAULT_RANGE_INDEX);
   const range = RANGES[rangeIndex];
 
   const filtered = useMemo(() => {
-    if (range.days === Number.POSITIVE_INFINITY) return history;
-    const cutoff = Date.now() - range.days * 24 * 60 * 60 * 1000;
+    const cutoff = range.getCutoff();
+    if (cutoff === Number.NEGATIVE_INFINITY) return history;
     return history.filter((p) => new Date(p.date).getTime() >= cutoff);
   }, [history, range]);
 
@@ -52,13 +46,13 @@ export function MetricsCards({ history, currentValue, totalInvested }: Props) {
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-lg font-semibold">Performance</h3>
-        <div className="flex gap-1 rounded-lg border border-[var(--border)] p-1">
+        <div className="flex flex-wrap gap-1 rounded-lg border border-[var(--border)] p-1">
           {RANGES.map((r, i) => (
             <button
               key={r.label}
               type="button"
               onClick={() => setRangeIndex(i)}
-              className={`rounded px-3 py-1 text-sm transition ${
+              className={`rounded px-2.5 py-1 text-sm transition ${
                 i === rangeIndex
                   ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

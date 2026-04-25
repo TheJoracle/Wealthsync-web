@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { DEFAULT_RANGE_INDEX, RANGES } from '@/lib/ranges';
 
 export type HistoryPoint = {
   date: string; // YYYY-MM-DD
@@ -22,13 +23,6 @@ export type BenchmarkSeries = {
   name: string;
   points: { date: string; price: number }[];
 };
-
-const RANGES = [
-  { label: '30d', days: 30 },
-  { label: '90d', days: 90 },
-  { label: '1y', days: 365 },
-  { label: 'All', days: Number.POSITIVE_INFINITY },
-] as const;
 
 function fmtEur(n: number) {
   return `€${n.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}`;
@@ -45,13 +39,13 @@ type Props = {
 };
 
 export function PortfolioHistoryChart({ data, benchmarks }: Props) {
-  const [rangeIndex, setRangeIndex] = useState(0);
+  const [rangeIndex, setRangeIndex] = useState(DEFAULT_RANGE_INDEX);
   const [benchmarkSymbol, setBenchmarkSymbol] = useState<string>('');
   const range = RANGES[rangeIndex];
 
   const filtered = useMemo(() => {
-    if (range.days === Number.POSITIVE_INFINITY) return data;
-    const cutoff = Date.now() - range.days * 24 * 60 * 60 * 1000;
+    const cutoff = range.getCutoff();
+    if (cutoff === Number.NEGATIVE_INFINITY) return data;
     return data.filter((p) => new Date(p.date).getTime() >= cutoff);
   }, [data, range]);
 
@@ -149,13 +143,13 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
               </option>
             ))}
           </select>
-          <div className="flex gap-1 rounded-lg border border-[var(--border)] p-1">
+          <div className="flex flex-wrap gap-1 rounded-lg border border-[var(--border)] p-1">
             {RANGES.map((r, i) => (
               <button
                 key={r.label}
                 type="button"
                 onClick={() => setRangeIndex(i)}
-                className={`rounded px-3 py-1 text-sm transition ${
+                className={`rounded px-2.5 py-1 text-sm transition ${
                   i === rangeIndex
                     ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
