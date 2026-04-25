@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { GoalCard, type Goal } from '@/components/goal-card';
+import { RetirementCalculator } from '@/components/retirement-calculator';
 
 export const metadata = { title: 'Doelen — WealthSync' };
 
@@ -11,11 +12,16 @@ export default async function GoalsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: goals } = await supabase
-    .from('goals')
-    .select('id, name, target_amount, current_amount, target_date, status, created_at')
-    .order('created_at', { ascending: false })
-    .returns<Goal[]>();
+  const [{ data: goals }, { data: assets }] = await Promise.all([
+    supabase
+      .from('goals')
+      .select('id, name, target_amount, current_amount, target_date, status, created_at')
+      .order('created_at', { ascending: false })
+      .returns<Goal[]>(),
+    supabase.from('assets').select('value'),
+  ]);
+
+  const portfolioValue = (assets ?? []).reduce((s, a) => s + Number(a.value), 0);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -68,6 +74,10 @@ export default async function GoalsPage() {
             ))}
           </div>
         )}
+
+        <section className="mt-10">
+          <RetirementCalculator initialSavings={portfolioValue} />
+        </section>
       </main>
     </div>
   );
