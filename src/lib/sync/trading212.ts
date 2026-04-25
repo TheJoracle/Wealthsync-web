@@ -30,12 +30,22 @@ export type SyncResult = {
 export async function syncTrading212(
   supabase: SupabaseClient,
   userId: string,
-  credentials: { api_key: string; mode?: 'live' | 'demo' },
+  credentials: { api_key: string; api_secret?: string; mode?: 'live' | 'demo' },
 ): Promise<SyncResult> {
   const host = credentials.mode === 'demo' ? 'demo.trading212.com' : 'live.trading212.com';
   const url = `https://${host}/api/v0/equity/portfolio`;
+
+  // New Trading 212 API uses HTTP Basic with `key:secret`. Older single-key
+  // setups still pass; we keep both paths for backwards compatibility.
+  const authHeader = credentials.api_secret
+    ? `Basic ${Buffer.from(`${credentials.api_key}:${credentials.api_secret}`).toString('base64')}`
+    : credentials.api_key;
+
   const res = await fetch(url, {
-    headers: { Authorization: credentials.api_key },
+    headers: {
+      Authorization: authHeader,
+      Accept: 'application/json',
+    },
     cache: 'no-store',
   });
   if (!res.ok) {

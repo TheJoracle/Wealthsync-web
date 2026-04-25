@@ -7,6 +7,6 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
 };
 
 export const PLATFORM_FIELDS: Record<Platform, { needsSecret: boolean }> = {
-  trading212: { needsSecret: false },
+  trading212: { needsSecret: true },
   bitvavo: { needsSecret: true },
 };
