@@ -1,8 +1,12 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   BarChart3,
   Bell,
   Calculator,
+  ChevronDown,
   Coins,
   LogOut,
   PieChart,
@@ -12,6 +16,12 @@ import {
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', Icon: BarChart3 },
@@ -25,28 +35,39 @@ const NAV_ITEMS = [
 ] as const;
 
 export function AppHeader({ userEmail }: { userEmail?: string | null }) {
+  const pathname = usePathname();
+  const current =
+    NAV_ITEMS.find((n) => pathname === n.href || pathname.startsWith(`${n.href}/`)) ??
+    NAV_ITEMS[0];
+  const CurrentIcon = current.Icon;
+
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3">
-        <div className="flex items-center gap-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-6 py-3">
+        <div className="flex items-center gap-4">
           <Link
             href="/dashboard"
             className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-xl font-black text-transparent"
           >
             WealthSync
           </Link>
-          <nav className="hidden flex-wrap items-center gap-1 lg:flex">
-            {NAV_ITEMS.map(({ href, label, Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
-              >
-                <Icon className="size-4" />
-                {label}
-              </Link>
-            ))}
-          </nav>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted"
+            >
+              <CurrentIcon className="size-4" />
+              {current.label}
+              <ChevronDown className="size-4 text-muted-foreground" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-48">
+              {NAV_ITEMS.map(({ href, label, Icon }) => (
+                <DropdownMenuItem key={href} render={<Link href={href} />}>
+                  <Icon className="size-4" />
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="flex items-center gap-2">
           {userEmail && (
@@ -61,19 +82,6 @@ export function AppHeader({ userEmail }: { userEmail?: string | null }) {
             </Button>
           </form>
         </div>
-        {/* Mobile nav (when desktop nav hidden) */}
-        <nav className="flex w-full flex-wrap items-center gap-1 border-t border-border pt-3 lg:hidden">
-          {NAV_ITEMS.map(({ href, label, Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
-            >
-              <Icon className="size-3.5" />
-              {label}
-            </Link>
-          ))}
-        </nav>
       </div>
     </header>
   );
