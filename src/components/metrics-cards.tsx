@@ -5,6 +5,7 @@ import {
   annualizedVolatility,
   maxDrawdown,
   periodReturn,
+  timeWeightedReturn,
   totalReturnOnCost,
   type HistoryPoint,
 } from '@/lib/metrics';
@@ -24,11 +25,24 @@ type Props = {
   history: HistoryPoint[];
   currentValue: number;
   totalInvested: number;
+  cashflowsByDate: Record<string, number>;
+  totalDividends: number;
 };
 
-export function MetricsCards({ history, currentValue, totalInvested }: Props) {
+export function MetricsCards({
+  history,
+  currentValue,
+  totalInvested,
+  cashflowsByDate,
+  totalDividends,
+}: Props) {
   const [rangeIndex, setRangeIndex] = useState(DEFAULT_RANGE_INDEX);
   const range = RANGES[rangeIndex];
+
+  const cashflowMap = useMemo(
+    () => new Map(Object.entries(cashflowsByDate)),
+    [cashflowsByDate],
+  );
 
   const filtered = useMemo(() => {
     const cutoff = range.getCutoff();
@@ -36,11 +50,13 @@ export function MetricsCards({ history, currentValue, totalInvested }: Props) {
     return history.filter((p) => new Date(p.date).getTime() >= cutoff);
   }, [history, range]);
 
-  const total = totalReturnOnCost(currentValue, totalInvested);
+  const totalPnlIncDividends = currentValue - totalInvested + totalDividends;
+  const totalReturnPct =
+    totalInvested > 0 ? totalPnlIncDividends / totalInvested : null;
   const period = periodReturn(filtered);
+  const twr = timeWeightedReturn(filtered, cashflowMap);
   const drawdown = maxDrawdown(filtered);
   const vol = annualizedVolatility(filtered);
-  const totalPnl = currentValue - totalInvested;
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
@@ -67,16 +83,26 @@ export function MetricsCards({ history, currentValue, totalInvested }: Props) {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Metric
           label="Totaal P&L"
-          value={fmtEur(totalPnl)}
-          subValue={fmtPct(total)}
-          tone={totalPnl >= 0 ? 'positive' : 'negative'}
-          hint="Sinds aankoop"
+          value={fmtEur(totalPnlIncDividends)}
+          subValue={fmtPct(totalReturnPct)}
+          tone={totalPnlIncDividends >= 0 ? 'positive' : 'negative'}
+          hint={
+            totalDividends > 0
+              ? `Sinds aankoop · incl. €${totalDividends.toFixed(0)} dividend`
+              : 'Sinds aankoop'
+          }
         />
         <Metric
-          label="Periode-return"
-          value={fmtPct(period)}
-          tone={period === null ? 'neutral' : period >= 0 ? 'positive' : 'negative'}
-          hint={range.label}
+          label="TWR"
+          value={fmtPct(twr ?? period)}
+          tone={
+            (twr ?? period) === null
+              ? 'neutral'
+              : (twr ?? period)! >= 0
+                ? 'positive'
+                : 'negative'
+          }
+          hint={`${range.label} · time-weighted`}
         />
         <Metric
           label="Max drawdown"

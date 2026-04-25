@@ -26,6 +26,8 @@ export default async function DashboardPage() {
     { data: history },
     { data: benchmarks },
     { data: benchmarkHistory },
+    { data: cashflowTxs },
+    { data: divs },
   ] = await Promise.all([
     supabase
       .from('assets')
@@ -44,6 +46,11 @@ export default async function DashboardPage() {
       .from('benchmark_history')
       .select('symbol, date, price')
       .order('date', { ascending: true }),
+    supabase
+      .from('transactions')
+      .select('type, total_value, transaction_date')
+      .in('type', ['deposit', 'withdrawal']),
+    supabase.from('dividend_payments').select('total_amount, withholding_tax_amount, net_amount'),
   ]);
 
   const totalValue = (assets ?? []).reduce((sum, a) => sum + Number(a.value), 0);
@@ -67,6 +74,22 @@ export default async function DashboardPage() {
       .filter((bh) => bh.symbol === b.symbol)
       .map((bh) => ({ date: bh.date, price: Number(bh.price) })),
   }));
+
+  const cashflowsByDate: Record<string, number> = {};
+  for (const t of cashflowTxs ?? []) {
+    const date = String(t.transaction_date).slice(0, 10);
+    const sign = t.type === 'deposit' ? 1 : -1;
+    cashflowsByDate[date] = (cashflowsByDate[date] ?? 0) + sign * Number(t.total_value);
+  }
+
+  const totalDividends = (divs ?? []).reduce(
+    (s, d) =>
+      s +
+      Number(
+        d.net_amount ?? Number(d.total_amount) - Number(d.withholding_tax_amount ?? 0),
+      ),
+    0,
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -145,6 +168,8 @@ export default async function DashboardPage() {
             history={historyPoints}
             currentValue={totalValue}
             totalInvested={totalInvested}
+            cashflowsByDate={cashflowsByDate}
+            totalDividends={totalDividends}
           />
         </section>
 

@@ -61,3 +61,34 @@ export function totalReturnOnCost(
   if (totalInvested <= 0) return null;
   return (currentValue - totalInvested) / totalInvested;
 }
+
+/**
+ * Time-weighted return — neutralises the effect of deposits and withdrawals,
+ * which is the standard way brokers compute their headline rendement %.
+ *
+ *   r_t = (V_t - cashflow_t) / V_{t-1}
+ *   TWR = ∏ (1 + r_t) - 1
+ *
+ * `cashflowsByDate` should be net external flow per day (deposits positive,
+ * withdrawals negative). Trades within the portfolio (asset-to-asset) are
+ * NOT cash flows — they don't change invested capital.
+ */
+export function timeWeightedReturn(
+  points: HistoryPoint[],
+  cashflowsByDate: Map<string, number>,
+): number | null {
+  if (points.length < 2) return null;
+  let cumulative = 1;
+  let any = false;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1].total_value;
+    const curr = points[i].total_value;
+    if (prev <= 0) continue;
+    const cf = cashflowsByDate.get(points[i].date) ?? 0;
+    const adjusted = curr - cf;
+    if (adjusted <= 0) continue;
+    cumulative *= adjusted / prev;
+    any = true;
+  }
+  return any ? cumulative - 1 : null;
+}
