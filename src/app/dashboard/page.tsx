@@ -77,6 +77,12 @@ export default async function DashboardPage() {
           </h1>
           <div className="flex items-center gap-3">
             <Link
+              href="/goals"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+            >
+              Doelen
+            </Link>
+            <Link
               href="/connections"
               className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
             >
