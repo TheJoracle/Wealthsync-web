@@ -72,6 +72,29 @@ export async function GET(request: NextRequest) {
     });
 
     updated++;
+
+    // Check active price alerts for this asset
+    const { data: alerts } = await supabase
+      .from('price_alerts')
+      .select('id, target_price, condition')
+      .eq('asset_id', asset.id)
+      .eq('is_active', true);
+    for (const alert of alerts ?? []) {
+      const target = Number(alert.target_price);
+      const triggered =
+        (alert.condition === 'above' && pricePerUnit >= target) ||
+        (alert.condition === 'below' && pricePerUnit <= target);
+      if (triggered) {
+        // Deactivate so it only fires once. Email/push notifications come later.
+        await supabase
+          .from('price_alerts')
+          .update({ is_active: false })
+          .eq('id', alert.id);
+        console.log(
+          `[ALERT] ${asset.symbol} ${alert.condition} €${target} triggered at €${pricePerUnit.toFixed(2)}`,
+        );
+      }
+    }
   }
 
   // Write per-user portfolio_history snapshot for today
