@@ -27,14 +27,21 @@ export type RealizedSale = {
   realized: number;
 };
 
+export type OpenPosition = {
+  symbol: string;
+  quantity: number;
+  costBasis: number; // total EUR cost still on the books
+  averagePrice: number; // costBasis / quantity
+};
+
 export type FifoResult = {
   sales: RealizedSale[];
   totalRealized: number;
   totalSoldValue: number;
+  openPositions: OpenPosition[];
 };
 
 export function computeFifoRealized(transactions: Transaction[]): FifoResult {
-  // Group by symbol, sort each group by date asc
   const bySymbol = new Map<string, Transaction[]>();
   for (const t of transactions) {
     if (!t.symbol) continue;
@@ -44,6 +51,7 @@ export function computeFifoRealized(transactions: Transaction[]): FifoResult {
   }
 
   const sales: RealizedSale[] = [];
+  const openPositions: OpenPosition[] = [];
 
   for (const [symbol, txs] of bySymbol) {
     txs.sort(
@@ -81,7 +89,7 @@ export function computeFifoRealized(transactions: Transaction[]): FifoResult {
           remaining = 0;
         }
       }
-      const matchedQty = qty - remaining; // unmatched quantity is treated as zero-cost
+      const matchedQty = qty - remaining;
       const sellValue = matchedQty * price;
       const realized = sellValue - costBasis;
       sales.push({
@@ -91,6 +99,18 @@ export function computeFifoRealized(transactions: Transaction[]): FifoResult {
         sellPrice: price,
         costBasis,
         realized,
+      });
+    }
+
+    // Anything still in `lots` is currently held — collapse into an open position.
+    if (lots.length > 0) {
+      const totalQty = lots.reduce((s, l) => s + l.qty, 0);
+      const totalCost = lots.reduce((s, l) => s + l.qty * l.price, 0);
+      openPositions.push({
+        symbol,
+        quantity: totalQty,
+        costBasis: totalCost,
+        averagePrice: totalQty > 0 ? totalCost / totalQty : 0,
       });
     }
   }
@@ -104,5 +124,5 @@ export function computeFifoRealized(transactions: Transaction[]): FifoResult {
     0,
   );
 
-  return { sales, totalRealized, totalSoldValue };
+  return { sales, totalRealized, totalSoldValue, openPositions };
 }
