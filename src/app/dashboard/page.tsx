@@ -83,6 +83,12 @@ export default async function DashboardPage() {
               Doelen
             </Link>
             <Link
+              href="/transactions"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+            >
+              Transacties
+            </Link>
+            <Link
               href="/dividends"
               className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
             >
