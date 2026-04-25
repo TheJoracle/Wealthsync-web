@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { enrichTicker } from '@/lib/asset-metadata';
 import { ASSET_TYPES, type AssetType } from '@/app/assets/types';
 
 type AssetInput = {
@@ -46,7 +48,7 @@ function parseForm(formData: FormData): { data?: AssetInput; error?: string } {
 
 export async function addAsset(formData: FormData) {
   const parsed = parseForm(formData);
-  if (parsed.error) return { error: parsed.error };
+  if (parsed.error || !parsed.data) return { error: parsed.error ?? 'Invalid input' };
 
   const supabase = await createClient();
   const {
@@ -54,8 +56,19 @@ export async function addAsset(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  const { error } = await supabase.from('assets').insert({
+  // Auto-enrich missing fields from curated map / cache / API. Manual user
+  // input always wins — `mergeMissing` only fills empty slots.
+  const admin = createAdminClient();
+  const meta = await enrichTicker(admin, parsed.data.symbol);
+  const enriched = {
     ...parsed.data,
+    name: parsed.data.name || meta.name || parsed.data.symbol,
+    sector: parsed.data.sector || meta.sector || null,
+    geography: parsed.data.geography || meta.geography || null,
+  };
+
+  const { error } = await supabase.from('assets').insert({
+    ...enriched,
     user_id: user.id,
     source: 'manual',
     last_updated: new Date().toISOString(),

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { enrichTicker } from '@/lib/asset-metadata';
 
 type Trading212Position = {
   ticker: string;
@@ -94,14 +95,17 @@ export async function syncTrading212(
         .eq('id', existing[0].id);
       if (error) { skipped++; continue; }
     } else {
+      const meta = await enrichTicker(supabase, symbol);
       const { error } = await supabase.from('assets').insert({
         user_id: userId,
-        name: symbol,
+        name: meta.name ?? symbol,
         symbol,
-        type: guessAssetType(symbol),
+        type: meta.type ?? guessAssetType(symbol),
         amount: p.quantity,
         value,
         purchase_price: purchasePrice,
+        sector: meta.sector ?? null,
+        geography: meta.geography ?? null,
         source: 'trading212',
         last_updated: now,
       });

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { SyncResult } from './trading212';
+import { enrichTicker } from '@/lib/asset-metadata';
 
 type BitvavoBalance = { symbol: string; available: string; inOrder: string };
 type BitvavoPrice = { market: string; price: string };
@@ -103,14 +104,17 @@ export async function syncBitvavo(
         .eq('id', existing[0].id);
       if (error) { skipped++; continue; }
     } else {
+      const meta = await enrichTicker(supabase, b.symbol);
       const { error } = await supabase.from('assets').insert({
         user_id: userId,
-        name: b.symbol,
+        name: meta.name ?? b.symbol,
         symbol: b.symbol,
-        type: 'Crypto',
+        type: meta.type ?? 'Crypto',
         amount,
         value,
         purchase_price: 0,
+        sector: meta.sector ?? 'Cryptocurrency',
+        geography: meta.geography ?? 'Gedecentraliseerd',
         source: 'bitvavo',
         last_updated: now,
       });
