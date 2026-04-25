@@ -3,7 +3,11 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 type Mode = 'login' | 'register';
 
@@ -55,25 +59,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <label htmlFor="email" className="text-sm font-medium text-[var(--text-secondary)]">
-          Email
-        </label>
-        <input
+        <Label htmlFor="email">Email</Label>
+        <Input
           id="email"
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="password" className="text-sm font-medium text-[var(--text-secondary)]">
-          Wachtwoord
-        </label>
-        <input
+        <Label htmlFor="password">Wachtwoord</Label>
+        <Input
           id="password"
           type="password"
           required
@@ -81,44 +80,40 @@ export function AuthForm({ mode }: { mode: Mode }) {
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
         {mode === 'register' && (
-          <p className="text-xs text-[var(--text-muted)]">Minimaal 8 tekens.</p>
+          <p className="text-xs text-muted-foreground">Minimaal 8 tekens.</p>
         )}
       </div>
 
       {error && (
-        <div className="rounded-lg border border-[var(--danger)] bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
       {info && (
-        <div className="rounded-lg border border-[var(--brand)] bg-[var(--brand)]/10 px-4 py-3 text-sm text-[var(--brand)]">
+        <div className="rounded-md border border-primary/50 bg-primary/10 px-4 py-3 text-sm text-primary">
           {info}
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-2 rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
-      >
-        {loading ? '...' : mode === 'login' ? 'Inloggen' : 'Account aanmaken'}
-      </button>
+      <Button type="submit" disabled={loading} size="lg" className="mt-2">
+        {loading && <Loader2 className="animate-spin" />}
+        {mode === 'login' ? 'Inloggen' : 'Account aanmaken'}
+      </Button>
 
-      <p className="text-center text-sm text-[var(--text-secondary)]">
+      <p className="text-center text-sm text-muted-foreground">
         {mode === 'login' ? (
           <>
             Nog geen account?{' '}
-            <Link href="/register" className="text-[var(--brand)] hover:underline">
+            <Link href="/register" className="font-medium text-primary hover:underline">
               Registreer
             </Link>
           </>
         ) : (
           <>
             Al een account?{' '}
-            <Link href="/login" className="text-[var(--brand)] hover:underline">
+            <Link href="/login" className="font-medium text-primary hover:underline">
               Inloggen
             </Link>
           </>

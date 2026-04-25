@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Plus } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { AppHeader } from '@/components/app-header';
+import { buttonVariants } from '@/components/ui/button';
 import { TransactionsList, type TransactionRow } from '@/components/transactions-list';
 import { RealizedGains } from '@/components/realized-gains';
 import { computeFifoRealized, type Transaction } from '@/lib/fifo';
@@ -35,40 +37,20 @@ export default async function TransactionsPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-[var(--border)] px-6 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link
-            href="/dashboard"
-            className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent"
-          >
-            WealthSync
-          </Link>
-          <ThemeToggle />
-        </div>
-      </header>
+      <AppHeader userEmail={user.email} />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Transacties</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            <p className="mt-1 text-sm text-muted-foreground">
               Volledige historie van aan- en verkopen, dividenden en stortingen.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--brand)]"
-            >
-              ← Dashboard
-            </Link>
-            <Link
-              href="/transactions/new"
-              className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110"
-            >
-              + Nieuwe transactie
-            </Link>
-          </div>
+          <Link href="/transactions/new" className={buttonVariants({ size: 'lg' })}>
+            <Plus />
+            Nieuwe transactie
+          </Link>
         </div>
 
         <div className="flex flex-col gap-6">

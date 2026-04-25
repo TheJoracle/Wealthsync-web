@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { AppHeader } from '@/components/app-header';
 import { DividendList } from '@/components/dividend-list';
 
 export const metadata = { title: 'Dividenden — WealthSync' };
@@ -35,32 +34,14 @@ export default async function DividendsPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-[var(--border)] px-6 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link
-            href="/dashboard"
-            className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent"
-          >
-            WealthSync
-          </Link>
-          <ThemeToggle />
-        </div>
-      </header>
+      <AppHeader userEmail={user.email} />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Dividenden</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Ontvangen dividenden, jaartotalen en bronbelasting voor je belastingaangifte.
-            </p>
-          </div>
-          <Link
-            href="/dashboard"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--brand)]"
-          >
-            ← Dashboard
-          </Link>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Dividenden</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Ontvangen dividenden, jaartotalen en bronbelasting voor je belastingaangifte.
+          </p>
         </div>
 
         <DividendList dividends={dividends ?? []} />

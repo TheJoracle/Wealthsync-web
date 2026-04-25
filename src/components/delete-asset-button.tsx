@@ -1,28 +1,53 @@
 'use client';
 
 import { useTransition } from 'react';
+import { Trash2 } from 'lucide-react';
 import { deleteAsset } from '@/app/assets/actions';
+import { buttonVariants } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export function DeleteAssetButton({ id, name }: { id: number; name: string }) {
   const [pending, startTransition] = useTransition();
 
-  function onClick() {
-    if (!confirm(`"${name}" verwijderen? Dit verwijdert ook de prijsgeschiedenis van dit asset.`)) {
-      return;
-    }
+  function onConfirm() {
     startTransition(async () => {
       await deleteAsset(id);
     });
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={pending}
-      className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--danger)] hover:text-[var(--danger)] disabled:opacity-50"
-    >
-      {pending ? '...' : 'Verwijder'}
-    </button>
+    <AlertDialog>
+      <AlertDialogTrigger
+        className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
+        disabled={pending}
+        title="Verwijder"
+      >
+        <Trash2 />
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Asset verwijderen?</AlertDialogTitle>
+          <AlertDialogDescription>
+            "{name}" wordt verwijderd inclusief de bijhorende prijsgeschiedenis. Deze actie kan niet ongedaan gemaakt worden.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuleren</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} disabled={pending}>
+            {pending ? 'Bezig...' : 'Verwijder'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

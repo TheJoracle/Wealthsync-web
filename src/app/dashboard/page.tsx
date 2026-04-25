@@ -1,11 +1,20 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Plus, Pencil } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { AppHeader } from '@/components/app-header';
 import { DeleteAssetButton } from '@/components/delete-asset-button';
 import { PortfolioHistoryChart } from '@/components/portfolio-history-chart';
 import { AllocationChart } from '@/components/allocation-chart';
 import { MetricsCards } from '@/components/metrics-cards';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export const metadata = {
   title: 'Dashboard — WealthSync',
@@ -93,75 +102,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-[var(--border)] px-6 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <h1 className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent">
-            WealthSync
-          </h1>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/goals"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
-            >
-              Doelen
-            </Link>
-            <Link
-              href="/charts"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
-            >
-              Charts
-            </Link>
-            <Link
-              href="/transactions"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
-            >
-              Transacties
-            </Link>
-            <Link
-              href="/dividends"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
-            >
-              Dividenden
-            </Link>
-            <Link
-              href="/tax"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
-            >
-              Belasting
-            </Link>
-            <Link
-              href="/alerts"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
-            >
-              Alerts
-            </Link>
-            <Link
-              href="/connections"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
-            >
-              Connections
-            </Link>
-            <span className="text-sm text-[var(--text-secondary)]">{user.email}</span>
-            <ThemeToggle />
-            <form action="/logout" method="post">
-              <button
-                type="submit"
-                className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-secondary)] transition hover:border-[var(--danger)] hover:text-[var(--danger)]"
-              >
-                Uitloggen
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
+      <AppHeader userEmail={user.email} />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-8">
-          <p className="text-sm text-[var(--text-secondary)]">Totale portfolio-waarde</p>
-          <p className="mt-2 text-5xl font-bold">
-            €{totalValue.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-        </section>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
+        <Card>
+          <CardHeader>
+            <CardDescription>Totale portfolio-waarde</CardDescription>
+            <CardTitle className="text-5xl font-bold tabular-nums">
+              €{totalValue.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </CardTitle>
+          </CardHeader>
+        </Card>
 
         <section className="mt-6">
           <MetricsCards
@@ -181,21 +132,21 @@ export default async function DashboardPage() {
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Assets</h2>
-            <Link
-              href="/assets/new"
-              className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110"
-            >
-              + Nieuw asset
+            <Link href="/assets/new" className={buttonVariants({ size: 'lg' })}>
+              <Plus />
+              Nieuw asset
             </Link>
           </div>
           {!assets || assets.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-card)] p-8 text-center">
-              <p className="text-[var(--text-secondary)]">
-                Nog geen assets. Klik op <strong>Nieuw asset</strong> om er een toe te voegen.
-              </p>
-            </div>
+            <Card className="border-dashed">
+              <CardContent className="py-10 text-center">
+                <p className="text-muted-foreground">
+                  Nog geen assets. Klik op <strong>Nieuw asset</strong> om er een toe te voegen.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {assets.map((asset) => {
                 const value = Number(asset.value);
                 const cost = Number(asset.purchase_price ?? 0);
@@ -203,46 +154,46 @@ export default async function DashboardPage() {
                 const pct = cost > 0 ? ((value - cost) / cost) * 100 : null;
                 const positive = pnl !== null && pnl >= 0;
                 return (
-                  <div
-                    key={asset.id}
-                    className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-4"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{asset.name}</p>
-                      <p className="truncate text-sm text-[var(--text-secondary)]">
-                        {asset.symbol} · {asset.type} · {Number(asset.amount).toLocaleString('nl-NL')}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-lg font-semibold">
-                          €{value.toLocaleString('nl-NL', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                  <Card key={asset.id}>
+                    <CardContent className="flex items-center justify-between gap-3 px-6 py-4">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{asset.name}</p>
+                        <p className="truncate text-sm text-muted-foreground">
+                          {asset.symbol} · {asset.type} · {Number(asset.amount).toLocaleString('nl-NL')}
                         </p>
-                        {pct !== null && (
-                          <p
-                            className={`text-xs font-medium ${
-                              positive ? 'text-[var(--brand)]' : 'text-[var(--danger)]'
-                            }`}
-                          >
-                            {positive ? '+' : ''}€{pnl!.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}{' '}
-                            ({positive ? '+' : ''}{pct.toFixed(1)}%)
+                      </div>
+                      <div className="flex shrink-0 items-center gap-4">
+                        <div className="text-right tabular-nums">
+                          <p className="text-lg font-semibold">
+                            €{value.toLocaleString('nl-NL', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </p>
-                        )}
+                          {pct !== null && (
+                            <p
+                              className={`text-xs font-medium ${
+                                positive ? 'text-primary' : 'text-destructive'
+                              }`}
+                            >
+                              {positive ? '+' : ''}€{pnl!.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}{' '}
+                              ({positive ? '+' : ''}{pct.toFixed(1)}%)
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          <Link
+                            href={`/assets/${asset.id}/edit`}
+                            className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
+                            title="Bewerk"
+                          >
+                            <Pencil />
+                          </Link>
+                          <DeleteAssetButton id={asset.id} name={asset.name} />
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/assets/${asset.id}/edit`}
-                          className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
-                        >
-                          Bewerk
-                        </Link>
-                        <DeleteAssetButton id={asset.id} name={asset.name} />
-                      </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>

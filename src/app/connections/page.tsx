@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { AppHeader } from '@/components/app-header';
 import { ConnectionCard } from '@/components/connection-card';
 import { PLATFORMS, type Platform } from '@/app/connections/types';
 
@@ -31,32 +30,14 @@ export default async function ConnectionsPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-[var(--border)] px-6 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link
-            href="/dashboard"
-            className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent"
-          >
-            WealthSync
-          </Link>
-          <ThemeToggle />
-        </div>
-      </header>
+      <AppHeader userEmail={user.email} />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Broker-connecties</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Koppel je brokers zodat we automatisch je portfolio synchroniseren.
-            </p>
-          </div>
-          <Link
-            href="/dashboard"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--brand)]"
-          >
-            ← Dashboard
-          </Link>
+      <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Broker-connecties</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Koppel je brokers zodat we automatisch je portfolio synchroniseren.
+          </p>
         </div>
 
         <div className="flex flex-col gap-4">
