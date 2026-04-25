@@ -159,7 +159,7 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
           name="notes"
           rows={3}
           defaultValue={initial?.notes}
-          className="flex w-full min-h-16 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="flex w-full min-h-16 rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground shadow-xs outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
         />
       </Field>
 
