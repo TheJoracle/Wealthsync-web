@@ -3,7 +3,18 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 import { ASSET_TYPES } from '@/app/assets/types';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type AssetFormValues = {
   name: string;
@@ -25,11 +36,13 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [type, setType] = useState<string>(initial?.type ?? 'ETF');
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     const formData = new FormData(event.currentTarget);
+    formData.set('type', type);
     startTransition(async () => {
       const result = await onSubmit(formData);
       if (result?.error) setError(result.error);
@@ -39,82 +52,100 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <Field label="Naam" name="name" defaultValue={initial?.name} required />
+      <Field label="Naam" htmlFor="name" required>
+        <Input id="name" name="name" required defaultValue={initial?.name} />
+      </Field>
 
       <Field
         label="Symbool / Ticker"
-        name="symbol"
-        defaultValue={initial?.symbol}
-        placeholder="Bijv. VWCE, BTC, GOLD"
+        htmlFor="symbol"
         required
-      />
+      >
+        <Input
+          id="symbol"
+          name="symbol"
+          required
+          defaultValue={initial?.symbol}
+          placeholder="Bijv. VWCE, BTC, GOLD"
+        />
+      </Field>
 
-      <Select
-        label="Type"
-        name="type"
-        defaultValue={initial?.type ?? 'ETF'}
-        options={ASSET_TYPES}
-      />
+      <Field label="Type" htmlFor="type" required>
+        <Select value={type} onValueChange={(v) => v && setType(v)}>
+          <SelectTrigger id="type">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {ASSET_TYPES.map((t) => (
+              <SelectItem key={t} value={t}>{t}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
 
-      <Field
-        label="Aantal (units / coins / grams)"
-        name="amount"
-        type="number"
-        step="any"
-        defaultValue={initial?.amount}
-        required
-      />
+      <Field label="Aantal (units / coins / grams)" htmlFor="amount" required>
+        <Input
+          id="amount"
+          name="amount"
+          type="number"
+          step="any"
+          required
+          defaultValue={initial?.amount}
+        />
+      </Field>
 
       <Field
         label="Huidige waarde (€)"
-        name="value"
-        type="number"
-        step="any"
-        defaultValue={initial?.value}
+        htmlFor="value"
         required
         hint="Wordt dagelijks automatisch bijgewerkt via de cron."
-      />
+      >
+        <Input
+          id="value"
+          name="value"
+          type="number"
+          step="any"
+          required
+          defaultValue={initial?.value}
+        />
+      </Field>
 
       <Field
         label="Aankoopprijs totaal (€, optioneel)"
-        name="purchase_price"
-        type="number"
-        step="any"
-        defaultValue={initial?.purchase_price ?? 0}
+        htmlFor="purchase_price"
         hint="Totaal betaald voor alle units — voor winst/verlies-berekening."
-      />
+      >
+        <Input
+          id="purchase_price"
+          name="purchase_price"
+          type="number"
+          step="any"
+          defaultValue={initial?.purchase_price ?? 0}
+        />
+      </Field>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="notes" className="text-sm font-medium text-[var(--text-secondary)]">
-          Notities (optioneel)
-        </label>
+      <Field label="Notities (optioneel)" htmlFor="notes">
         <textarea
           id="notes"
           name="notes"
           rows={3}
           defaultValue={initial?.notes}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
+          className="flex w-full min-h-16 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
-      </div>
+      </Field>
 
       {error && (
-        <div className="rounded-lg border border-[var(--danger)] bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <div className="mt-2 flex gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-6 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
-        >
-          {pending ? '...' : submitLabel}
-        </button>
-        <Link
-          href="/dashboard"
-          className="rounded-lg border border-[var(--border)] px-6 py-3 font-semibold text-[var(--text-secondary)] transition hover:border-[var(--border-hover)]"
-        >
+        <Button type="submit" disabled={pending} size="lg">
+          {pending && <Loader2 className="animate-spin" />}
+          {submitLabel}
+        </Button>
+        <Link href="/dashboard" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
           Annuleren
         </Link>
       </div>
@@ -124,72 +155,25 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
 
 function Field({
   label,
-  name,
-  type = 'text',
-  defaultValue,
-  placeholder,
-  step,
+  htmlFor,
   required,
   hint,
+  children,
 }: {
   label: string;
-  name: string;
-  type?: string;
-  defaultValue?: string | number;
-  placeholder?: string;
-  step?: string;
+  htmlFor?: string;
   required?: boolean;
   hint?: string;
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={name} className="text-sm font-medium text-[var(--text-secondary)]">
+      <Label htmlFor={htmlFor}>
         {label}
-        {required && <span className="text-[var(--danger)]"> *</span>}
-      </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        step={step}
-        required={required}
-        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
-      />
-      {hint && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
-    </div>
-  );
-}
-
-function Select({
-  label,
-  name,
-  defaultValue,
-  options,
-}: {
-  label: string;
-  name: string;
-  defaultValue: string;
-  options: readonly string[];
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={name} className="text-sm font-medium text-[var(--text-secondary)]">
-        {label} <span className="text-[var(--danger)]">*</span>
-      </label>
-      <select
-        id={name}
-        name={name}
-        defaultValue={defaultValue}
-        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
-      >
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
+      {children}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

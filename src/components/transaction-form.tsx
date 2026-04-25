@@ -3,11 +3,22 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 import {
   TRANSACTION_TYPES,
   TRANSACTION_TYPE_LABELS,
   type TransactionType,
 } from '@/app/transactions/types';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type TxFormValues = {
   type: TransactionType;
@@ -35,15 +46,13 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [type, setType] = useState<TransactionType>(initial?.type ?? 'buy');
   const [qty, setQty] = useState(initial?.quantity ?? 0);
   const [price, setPrice] = useState(initial?.price_per_unit ?? 0);
   const [fees, setFees] = useState(initial?.fees ?? 0);
-  const [total, setTotal] = useState(
-    initial?.total_value ?? 0,
-  );
+  const [total, setTotal] = useState(initial?.total_value ?? 0);
   const [totalDirty, setTotalDirty] = useState(false);
 
-  // Auto-compute total = qty × price + fees, unless user has manually edited.
   const autoTotal = qty * price + fees;
   const effectiveTotal = totalDirty ? total : autoTotal;
 
@@ -51,6 +60,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
     event.preventDefault();
     setError(null);
     const formData = new FormData(event.currentTarget);
+    formData.set('type', type);
     formData.set('total_value', String(effectiveTotal));
     startTransition(async () => {
       const result = await onSubmit(formData);
@@ -62,36 +72,41 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Type" required>
-          <select
-            name="type"
-            required
-            defaultValue={initial?.type ?? 'buy'}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
-          >
-            {TRANSACTION_TYPES.map((t) => (
-              <option key={t} value={t}>{TRANSACTION_TYPE_LABELS[t]}</option>
-            ))}
-          </select>
+        <Field label="Type" htmlFor="type" required>
+          <Select value={type} onValueChange={(v) => v && setType(v as TransactionType)}>
+            <SelectTrigger id="type">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TRANSACTION_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>{TRANSACTION_TYPE_LABELS[t]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
-        <Field label="Datum" required>
-          <input
+        <Field label="Datum" htmlFor="transaction_date" required>
+          <Input
+            id="transaction_date"
             type="date"
             name="transaction_date"
             required
             defaultValue={initial?.transaction_date?.slice(0, 10)}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
       </div>
 
-      <Field label="Symbool" required hint="Bijv. VWCED, BTC. Wordt automatisch gekoppeld aan je asset.">
-        <input
+      <Field
+        label="Symbool"
+        htmlFor="symbol"
+        required
+        hint="Bijv. VWCED, BTC. Wordt automatisch gekoppeld aan je asset."
+      >
+        <Input
+          id="symbol"
           name="symbol"
           required
           defaultValue={initial?.symbol}
           list="assets-datalist"
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
         />
         <datalist id="assets-datalist">
           {assets.map((a) => (
@@ -101,45 +116,47 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Aantal" required>
-          <input
+        <Field label="Aantal" htmlFor="quantity" required>
+          <Input
+            id="quantity"
             type="number"
             step="any"
             name="quantity"
             required
             value={qty}
             onChange={(e) => setQty(Number(e.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
-        <Field label="Prijs per stuk (€)" required>
-          <input
+        <Field label="Prijs per stuk (€)" htmlFor="price_per_unit" required>
+          <Input
+            id="price_per_unit"
             type="number"
             step="any"
             name="price_per_unit"
             required
             value={price}
             onChange={(e) => setPrice(Number(e.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
-        <Field label="Kosten (€)">
-          <input
+        <Field label="Kosten (€)" htmlFor="fees">
+          <Input
+            id="fees"
             type="number"
             step="any"
             name="fees"
             value={fees}
             onChange={(e) => setFees(Number(e.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
       </div>
 
       <Field
         label="Totaalwaarde (€)"
+        htmlFor="total_value_field"
         hint={totalDirty ? 'Handmatig overschreven.' : 'Auto: aantal × prijs + kosten'}
       >
-        <input
+        <Input
+          id="total_value_field"
           type="number"
           step="any"
           value={effectiveTotal}
@@ -147,45 +164,30 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             setTotal(Number(e.target.value));
             setTotalDirty(true);
           }}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
         />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Valuta">
-          <input
-            name="currency"
-            defaultValue={initial?.currency ?? 'EUR'}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
-          />
+        <Field label="Valuta" htmlFor="currency">
+          <Input id="currency" name="currency" defaultValue={initial?.currency ?? 'EUR'} />
         </Field>
-        <Field label="Notities">
-          <input
-            name="notes"
-            defaultValue={initial?.notes}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
-          />
+        <Field label="Notities" htmlFor="notes">
+          <Input id="notes" name="notes" defaultValue={initial?.notes} />
         </Field>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-[var(--danger)] bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <div className="mt-2 flex gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-6 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
-        >
-          {pending ? '...' : submitLabel}
-        </button>
-        <Link
-          href="/transactions"
-          className="rounded-lg border border-[var(--border)] px-6 py-3 font-semibold text-[var(--text-secondary)] transition hover:border-[var(--border-hover)]"
-        >
+        <Button type="submit" disabled={pending} size="lg">
+          {pending && <Loader2 className="animate-spin" />}
+          {submitLabel}
+        </Button>
+        <Link href="/transactions" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
           Annuleren
         </Link>
       </div>
@@ -195,23 +197,25 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
 
 function Field({
   label,
+  htmlFor,
   required,
-  children,
   hint,
+  children,
 }: {
   label: string;
+  htmlFor?: string;
   required?: boolean;
-  children: React.ReactNode;
   hint?: string;
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-[var(--text-secondary)]">
+      <Label htmlFor={htmlFor}>
         {label}
-        {required && <span className="text-[var(--danger)]"> *</span>}
-      </label>
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
       {children}
-      {hint && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
