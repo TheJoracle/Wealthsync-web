@@ -95,49 +95,49 @@ export default async function DashboardPage() {
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-[var(--border)] px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <h1 className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-2xl font-black text-transparent">
+          <h1 className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent">
             WealthSync
           </h1>
           <div className="flex items-center gap-3">
             <Link
               href="/goals"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
             >
               Doelen
             </Link>
             <Link
               href="/charts"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
             >
               Charts
             </Link>
             <Link
               href="/transactions"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
             >
               Transacties
             </Link>
             <Link
               href="/dividends"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
             >
               Dividenden
             </Link>
             <Link
               href="/tax"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
             >
               Belasting
             </Link>
             <Link
               href="/alerts"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
             >
               Alerts
             </Link>
             <Link
               href="/connections"
-              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--brand)]"
             >
               Connections
             </Link>
@@ -183,7 +183,7 @@ export default async function DashboardPage() {
             <h2 className="text-xl font-semibold">Assets</h2>
             <Link
               href="/assets/new"
-              className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-accent)] transition hover:brightness-110"
+              className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110"
             >
               + Nieuw asset
             </Link>
@@ -224,7 +224,7 @@ export default async function DashboardPage() {
                         {pct !== null && (
                           <p
                             className={`text-xs font-medium ${
-                              positive ? 'text-[var(--accent)]' : 'text-[var(--danger)]'
+                              positive ? 'text-[var(--brand)]' : 'text-[var(--danger)]'
                             }`}
                           >
                             {positive ? '+' : ''}€{pnl!.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}{' '}
@@ -235,7 +235,7 @@ export default async function DashboardPage() {
                       <div className="flex gap-2">
                         <Link
                           href={`/assets/${asset.id}/edit`}
-                          className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                          className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
                         >
                           Bewerk
                         </Link>

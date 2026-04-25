@@ -24,7 +24,7 @@ function fmtEur(n: number, frac = 0): string {
 function trackingState(goal: Goal): { label: string; color: string } {
   const progress = goal.target_amount > 0 ? goal.current_amount / goal.target_amount : 0;
 
-  if (progress >= 1) return { label: 'Voltooid', color: 'var(--accent)' };
+  if (progress >= 1) return { label: 'Voltooid', color: 'var(--brand)' };
   if (!goal.target_date) return { label: 'Actief', color: 'var(--text-secondary)' };
 
   const target = new Date(goal.target_date).getTime();
@@ -34,7 +34,7 @@ function trackingState(goal: Goal): { label: string; color: string } {
   if (totalSpan <= 0) return { label: 'Actief', color: 'var(--text-secondary)' };
   const timeProgress = Math.min(1, Math.max(0, (now - created) / totalSpan));
 
-  if (progress >= timeProgress) return { label: 'Op koers', color: 'var(--accent)' };
+  if (progress >= timeProgress) return { label: 'Op koers', color: 'var(--brand)' };
   const gap = (timeProgress - progress) * 100;
   if (gap < 10) return { label: 'Net achter', color: 'var(--warning)' };
   return { label: 'Achterop', color: 'var(--danger)' };
@@ -86,13 +86,13 @@ export function GoalCard({ goal }: { goal: Goal }) {
             onClick={onSync}
             disabled={pending}
             title="Vul huidig bedrag bij vanuit portfolio"
-            className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-50"
+            className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] disabled:opacity-50"
           >
             ⟳
           </button>
           <Link
             href={`/goals/${goal.id}/edit`}
-            className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
           >
             Bewerk
           </Link>
@@ -121,7 +121,7 @@ export function GoalCard({ goal }: { goal: Goal }) {
             className="h-full rounded-full transition-all"
             style={{
               width: `${progress * 100}%`,
-              background: `linear-gradient(90deg, var(--accent), var(--accent-hover))`,
+              background: `linear-gradient(90deg, var(--brand), var(--brand-hover))`,
             }}
           />
         </div>

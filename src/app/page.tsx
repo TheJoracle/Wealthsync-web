@@ -17,7 +17,7 @@ export default async function Home() {
     <div className="flex flex-col flex-1 min-h-screen">
       <header className="border-b border-[var(--border)] px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <h1 className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-2xl font-black text-transparent">
+          <h1 className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent">
             WealthSync
           </h1>
           <ThemeToggle />
@@ -35,13 +35,13 @@ export default async function Home() {
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-6 py-3 font-semibold text-[var(--on-accent)] transition hover:brightness-110"
+              className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-6 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110"
             >
               Account aanmaken
             </Link>
             <Link
               href="/login"
-              className="rounded-lg border border-[var(--border)] px-6 py-3 font-semibold text-[var(--text-primary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] px-6 py-3 font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
             >
               Inloggen
             </Link>

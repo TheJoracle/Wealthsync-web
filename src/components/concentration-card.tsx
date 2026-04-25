@@ -15,7 +15,7 @@ export function ConcentrationCard({ values, topSymbol }: { values: number[]; top
 
   const color =
     c.rating === 'spread'
-      ? 'var(--accent)'
+      ? 'var(--brand)'
       : c.rating === 'moderate'
         ? 'var(--warning)'
         : 'var(--danger)';

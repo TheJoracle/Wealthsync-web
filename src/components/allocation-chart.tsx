@@ -9,10 +9,10 @@ export type AllocationRow = {
 };
 
 const COLORS = [
-  'var(--accent)',
-  'var(--accent-secondary)',
+  'var(--brand)',
+  'var(--brand-secondary)',
   'var(--warning)',
-  'var(--accent-link)',
+  'var(--brand-link)',
   'var(--danger)',
 ];
 

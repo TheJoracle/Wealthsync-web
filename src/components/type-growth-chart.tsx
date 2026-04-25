@@ -31,10 +31,10 @@ function fmtDate(iso: string) {
 }
 
 const SERIES = [
-  { key: 'etf_value', label: 'ETFs', color: 'var(--accent)' },
-  { key: 'stock_value', label: 'Stocks', color: 'var(--accent-secondary)' },
+  { key: 'etf_value', label: 'ETFs', color: 'var(--brand)' },
+  { key: 'stock_value', label: 'Stocks', color: 'var(--brand-secondary)' },
   { key: 'crypto_value', label: 'Crypto', color: 'var(--warning)' },
-  { key: 'commodity_value', label: 'Commodities', color: 'var(--accent-link)' },
+  { key: 'commodity_value', label: 'Commodities', color: 'var(--brand-link)' },
 ] as const;
 
 export function TypeGrowthChart({ data }: { data: TypeHistoryPoint[] }) {
@@ -72,7 +72,7 @@ export function TypeGrowthChart({ data }: { data: TypeHistoryPoint[] }) {
               onClick={() => setRangeIndex(i)}
               className={`rounded px-2.5 py-1 text-sm transition ${
                 i === rangeIndex
-                  ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                  ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >

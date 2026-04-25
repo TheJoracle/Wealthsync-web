@@ -66,7 +66,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
           <p className="text-sm text-[var(--text-secondary)]">
             {connected ? (
               <>
-                <span className="text-[var(--accent)]">●</span> Gekoppeld
+                <span className="text-[var(--brand)]">●</span> Gekoppeld
                 {lastSync && ` · laatst gesynced ${new Date(lastSync).toLocaleString('nl-NL')}`}
               </>
             ) : (
@@ -84,7 +84,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
                 type="button"
                 onClick={onSync}
                 disabled={syncing || pending}
-                className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50"
+                className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
               >
                 {syncing ? 'Syncing...' : 'Sync nu'}
               </button>
@@ -101,7 +101,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-primary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-primary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
             >
               {open ? 'Annuleren' : 'Koppelen'}
             </button>
@@ -124,7 +124,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
               autoComplete="off"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
             />
           </div>
           {needsSecret && (
@@ -140,7 +140,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
                 autoComplete="off"
                 value={apiSecret}
                 onChange={(e) => setApiSecret(e.target.value)}
-                className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+                className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
               />
             </div>
           )}
@@ -163,7 +163,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
           <button
             type="submit"
             disabled={pending}
-            className="self-start rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-5 py-2.5 text-sm font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50"
+            className="self-start rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-5 py-2.5 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
           >
             {pending ? '...' : 'Opslaan'}
           </button>

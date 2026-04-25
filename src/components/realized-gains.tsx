@@ -48,7 +48,7 @@ export function RealizedGains({ result }: { result: FifoResult }) {
               onClick={() => setYear('all')}
               className={`rounded px-3 py-1 text-sm transition ${
                 year === 'all'
-                  ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                  ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -61,7 +61,7 @@ export function RealizedGains({ result }: { result: FifoResult }) {
                 onClick={() => setYear(y)}
                 className={`rounded px-3 py-1 text-sm transition ${
                   year === y
-                    ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                    ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -114,7 +114,7 @@ export function RealizedGains({ result }: { result: FifoResult }) {
                   <td className="px-4 py-2 text-right">€{s.costBasis.toFixed(2)}</td>
                   <td
                     className={`px-4 py-2 text-right font-semibold ${
-                      s.realized >= 0 ? 'text-[var(--accent)]' : 'text-[var(--danger)]'
+                      s.realized >= 0 ? 'text-[var(--brand)]' : 'text-[var(--danger)]'
                     }`}
                   >
                     {fmtEur(s.realized)}
@@ -140,7 +140,7 @@ function Stat({
 }) {
   const color =
     tone === 'positive'
-      ? 'text-[var(--accent)]'
+      ? 'text-[var(--brand)]'
       : tone === 'negative'
         ? 'text-[var(--danger)]'
         : tone === 'muted'

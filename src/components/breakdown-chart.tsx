@@ -4,10 +4,10 @@ import { useMemo } from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 const COLORS = [
-  'var(--accent)',
-  'var(--accent-secondary)',
+  'var(--brand)',
+  'var(--brand-secondary)',
   'var(--warning)',
-  'var(--accent-link)',
+  'var(--brand-link)',
   'var(--danger)',
   '#9333ea',
   '#06b6d4',

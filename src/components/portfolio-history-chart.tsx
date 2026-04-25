@@ -114,7 +114,7 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
           <h3 className="text-lg font-semibold">Portfolio-geschiedenis</h3>
           <p className="text-sm text-[var(--text-secondary)]">
             {fmtEur(first)} → {fmtEur(last)}{' '}
-            <span className={positive ? 'text-[var(--accent)]' : 'text-[var(--danger)]'}>
+            <span className={positive ? 'text-[var(--brand)]' : 'text-[var(--danger)]'}>
               ({positive ? '+' : ''}
               {pct.toFixed(1)}%)
             </span>
@@ -122,7 +122,7 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
               <>
                 {' · '}
                 <span className="text-[var(--text-muted)]">{selectedBench.name}:</span>{' '}
-                <span className={benchPct >= 0 ? 'text-[var(--accent-link)]' : 'text-[var(--danger)]'}>
+                <span className={benchPct >= 0 ? 'text-[var(--brand-link)]' : 'text-[var(--danger)]'}>
                   {benchPct >= 0 ? '+' : ''}
                   {benchPct.toFixed(1)}%
                 </span>
@@ -134,7 +134,7 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
           <select
             value={benchmarkSymbol}
             onChange={(e) => setBenchmarkSymbol(e.target.value)}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           >
             <option value="">Geen benchmark</option>
             {benchmarks.map((b) => (
@@ -151,7 +151,7 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
                 onClick={() => setRangeIndex(i)}
                 className={`rounded px-2.5 py-1 text-sm transition ${
                   i === rangeIndex
-                    ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                    ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -167,8 +167,8 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
           <ComposedChart data={merged} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.4} />
-                <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -201,7 +201,7 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
             <Area
               type="monotone"
               dataKey="total_value"
-              stroke="var(--accent)"
+              stroke="var(--brand)"
               strokeWidth={2}
               fill="url(#portfolioGradient)"
             />
@@ -209,7 +209,7 @@ export function PortfolioHistoryChart({ data, benchmarks }: Props) {
               <Line
                 type="monotone"
                 dataKey="benchmark"
-                stroke="var(--accent-link)"
+                stroke="var(--brand-link)"
                 strokeWidth={2}
                 strokeDasharray="4 4"
                 dot={false}

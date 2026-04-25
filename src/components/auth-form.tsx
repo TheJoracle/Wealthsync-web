@@ -65,7 +65,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
       </div>
 
@@ -81,7 +81,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
         {mode === 'register' && (
           <p className="text-xs text-[var(--text-muted)]">Minimaal 8 tekens.</p>
@@ -94,7 +94,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </div>
       )}
       {info && (
-        <div className="rounded-lg border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-3 text-sm text-[var(--accent)]">
+        <div className="rounded-lg border border-[var(--brand)] bg-[var(--brand)]/10 px-4 py-3 text-sm text-[var(--brand)]">
           {info}
         </div>
       )}
@@ -102,7 +102,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       <button
         type="submit"
         disabled={loading}
-        className="mt-2 rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-4 py-3 font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50"
+        className="mt-2 rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
       >
         {loading ? '...' : mode === 'login' ? 'Inloggen' : 'Account aanmaken'}
       </button>
@@ -111,14 +111,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
         {mode === 'login' ? (
           <>
             Nog geen account?{' '}
-            <Link href="/register" className="text-[var(--accent)] hover:underline">
+            <Link href="/register" className="text-[var(--brand)] hover:underline">
               Registreer
             </Link>
           </>
         ) : (
           <>
             Al een account?{' '}
-            <Link href="/login" className="text-[var(--accent)] hover:underline">
+            <Link href="/login" className="text-[var(--brand)] hover:underline">
               Inloggen
             </Link>
           </>

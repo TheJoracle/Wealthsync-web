@@ -70,7 +70,7 @@ export function MetricsCards({
               onClick={() => setRangeIndex(i)}
               className={`rounded px-2.5 py-1 text-sm transition ${
                 i === rangeIndex
-                  ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                  ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -136,7 +136,7 @@ function Metric({
 }) {
   const color =
     tone === 'positive'
-      ? 'text-[var(--accent)]'
+      ? 'text-[var(--brand)]'
       : tone === 'negative'
         ? 'text-[var(--danger)]'
         : 'text-[var(--text-primary)]';

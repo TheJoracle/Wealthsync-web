@@ -39,7 +39,7 @@ export default async function TransactionsPage() {
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link
             href="/dashboard"
-            className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-2xl font-black text-transparent"
+            className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent"
           >
             WealthSync
           </Link>
@@ -58,13 +58,13 @@ export default async function TransactionsPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]"
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--brand)]"
             >
               ← Dashboard
             </Link>
             <Link
               href="/transactions/new"
-              className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-accent)] transition hover:brightness-110"
+              className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110"
             >
               + Nieuwe transactie
             </Link>

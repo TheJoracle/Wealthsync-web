@@ -67,7 +67,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             name="type"
             required
             defaultValue={initial?.type ?? 'buy'}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           >
             {TRANSACTION_TYPES.map((t) => (
               <option key={t} value={t}>{TRANSACTION_TYPE_LABELS[t]}</option>
@@ -80,7 +80,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             name="transaction_date"
             required
             defaultValue={initial?.transaction_date?.slice(0, 10)}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
       </div>
@@ -91,7 +91,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
           required
           defaultValue={initial?.symbol}
           list="assets-datalist"
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
         />
         <datalist id="assets-datalist">
           {assets.map((a) => (
@@ -109,7 +109,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             required
             value={qty}
             onChange={(e) => setQty(Number(e.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
         <Field label="Prijs per stuk (€)" required>
@@ -120,7 +120,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             required
             value={price}
             onChange={(e) => setPrice(Number(e.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
         <Field label="Kosten (€)">
@@ -130,7 +130,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             name="fees"
             value={fees}
             onChange={(e) => setFees(Number(e.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
       </div>
@@ -147,7 +147,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             setTotal(Number(e.target.value));
             setTotalDirty(true);
           }}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
         />
       </Field>
 
@@ -156,14 +156,14 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
           <input
             name="currency"
             defaultValue={initial?.currency ?? 'EUR'}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
         <Field label="Notities">
           <input
             name="notes"
             defaultValue={initial?.notes}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           />
         </Field>
       </div>
@@ -178,7 +178,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-6 py-3 font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50"
+          className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-6 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
         >
           {pending ? '...' : submitLabel}
         </button>

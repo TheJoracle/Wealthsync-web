@@ -88,7 +88,7 @@ export function RebalanceTool({ assets }: { assets: AssetSlice[] }) {
             Stel je gewenste verdeling in. We laten zien wat je moet bij- of verkopen om er te komen.
           </p>
         </div>
-        {saved && <span className="text-xs text-[var(--accent)]">Opgeslagen</span>}
+        {saved && <span className="text-xs text-[var(--brand)]">Opgeslagen</span>}
       </div>
 
       {Math.abs(sumPct - 100) > 0.5 && (
@@ -124,7 +124,7 @@ export function RebalanceTool({ assets }: { assets: AssetSlice[] }) {
                 Math.abs(delta) < total * 0.005
                   ? 'text-[var(--text-muted)]'
                   : delta > 0
-                    ? 'text-[var(--accent)]'
+                    ? 'text-[var(--brand)]'
                     : 'text-[var(--danger)]';
               return (
                 <tr key={type} className="border-t border-[var(--border)]">
@@ -141,7 +141,7 @@ export function RebalanceTool({ assets }: { assets: AssetSlice[] }) {
                       step={1}
                       value={targets[type]}
                       onChange={(e) => setTarget(type, Number(e.target.value))}
-                      className="w-20 rounded border border-[var(--border)] bg-[var(--bg-panel)] px-2 py-1 text-right text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                      className="w-20 rounded border border-[var(--border)] bg-[var(--bg-panel)] px-2 py-1 text-right text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
                     />
                   </td>
                   <td className="px-4 py-3 text-right text-[var(--text-secondary)]">

@@ -75,7 +75,7 @@ export function AlertsManager({
               required
               value={assetId}
               onChange={(e) => setAssetId(Number(e.target.value))}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
             >
               {assets.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -95,7 +95,7 @@ export function AlertsManager({
               name="condition"
               value={condition}
               onChange={(e) => setCondition(e.target.value as 'above' | 'below')}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
             >
               <option value="above">Boven</option>
               <option value="below">Onder</option>
@@ -110,7 +110,7 @@ export function AlertsManager({
               required
               value={target}
               onChange={(e) => setTarget(Number(e.target.value))}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
             />
           </label>
           <input type="hidden" name="symbol" value={selectedAsset?.symbol ?? ''} />
@@ -122,7 +122,7 @@ export function AlertsManager({
           <button
             type="submit"
             disabled={pending || assets.length === 0}
-            className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50 sm:col-span-4 sm:max-w-xs"
+            className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-4 py-2 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50 sm:col-span-4 sm:max-w-xs"
           >
             {pending ? '...' : '+ Alert toevoegen'}
           </button>

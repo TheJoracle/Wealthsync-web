@@ -1,77 +1,189 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-/* WealthSync palette — matches dark/light theme from Python version */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * WealthSync palette (single source of truth).
+ *
+ * `--brand` = the green WealthSync accent. shadcn's primitives map their
+ * own `--primary` / `--ring` to this so buttons and focus rings come out
+ * branded.
+ *
+ * Theming model: `:root` defaults to LIGHT. Dark mode is opted into by
+ * adding the `dark` class to <html>. Theme-toggle component handles this.
+ */
+
 :root {
-  --bg-base: #0a0e14;
-  --bg-gradient-end: #1a1f2e;
-  --bg-card: #151a23;
-  --bg-panel: #1e2530;
-  --bg-pill: #2a3441;
-  --border: #2a3441;
-  --border-hover: #3a4451;
-  --text-primary: #ffffff;
-  --text-secondary: #a8b2c1;
-  --text-muted: #6b7280;
-  --accent: #00ff88;
-  --accent-hover: #00cc6f;
-  --accent-secondary: #0066ff;
-  --accent-link: #0088ff;
-  --on-accent: #0a0e14;
-  --danger: #ff3366;
-  --danger-hover: #cc2952;
-  --warning: #ff8800;
-  --overlay: rgba(0, 0, 0, 0.8);
-  --shadow: rgba(0, 0, 0, 0.3);
-  --color-scheme: dark;
-}
+  /* WealthSync brand */
+  --brand: #00a85a;
+  --brand-hover: #008847;
+  --brand-secondary: #0052d4;
+  --brand-link: #0066cc;
+  --on-brand: #ffffff;
+  --brand-tint: rgba(0, 168, 90, 0.12);
 
-:root[data-theme="light"] {
+  /* Surfaces */
   --bg-base: #f5f7fa;
   --bg-gradient-end: #ffffff;
   --bg-card: #ffffff;
   --bg-panel: #eef2f7;
   --bg-pill: #e1e7ef;
-  --border: #d8dee8;
-  --border-hover: #b8c2d0;
+
+  /* Text */
   --text-primary: #0f1724;
   --text-secondary: #4a5568;
   --text-muted: #8b95a5;
-  --accent: #00a85a;
-  --accent-hover: #008847;
-  --accent-secondary: #0052d4;
-  --accent-link: #0066cc;
-  --on-accent: #ffffff;
+
+  /* Borders */
+  --border-color: #d8dee8;
+  --border-hover: #b8c2d0;
+
+  /* Status */
   --danger: #d83260;
   --danger-hover: #b02650;
   --warning: #d97300;
+
+  /* Effects */
   --overlay: rgba(15, 23, 36, 0.4);
   --shadow: rgba(15, 23, 36, 0.08);
   --color-scheme: light;
+
+  /* shadcn vars — mapped to the WealthSync palette */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--bg-card);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-card);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--brand);
+  --primary-foreground: var(--on-brand);
+  --secondary: var(--bg-panel);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-panel);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--bg-pill);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--border-color);
+  --input: var(--border-color);
+  --ring: var(--brand);
+  --radius: 0.625rem;
+
+  /* Charts (shadcn defaults retained for any new shadcn chart components) */
+  --chart-1: var(--brand);
+  --chart-2: var(--brand-secondary);
+  --chart-3: var(--warning);
+  --chart-4: var(--brand-link);
+  --chart-5: var(--danger);
+
+  /* Sidebar — keep mapped even if we don't use shadcn sidebar yet */
+  --sidebar: var(--bg-card);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--on-brand);
+  --sidebar-accent: var(--bg-pill);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-color);
+  --sidebar-ring: var(--brand);
 }
 
-/* Tailwind v4 design tokens — exposes the CSS vars as utility classes
-   (e.g. bg-base, text-primary, border-border, text-accent) */
+.dark {
+  /* WealthSync brand — dark theme */
+  --brand: #00ff88;
+  --brand-hover: #00cc6f;
+  --brand-secondary: #0066ff;
+  --brand-link: #0088ff;
+  --on-brand: #0a0e14;
+  --brand-tint: rgba(0, 255, 136, 0.1);
+
+  /* Surfaces */
+  --bg-base: #0a0e14;
+  --bg-gradient-end: #1a1f2e;
+  --bg-card: #151a23;
+  --bg-panel: #1e2530;
+  --bg-pill: #2a3441;
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #a8b2c1;
+  --text-muted: #6b7280;
+
+  /* Borders */
+  --border-color: #2a3441;
+  --border-hover: #3a4451;
+
+  /* Status */
+  --danger: #ff3366;
+  --danger-hover: #cc2952;
+  --warning: #ff8800;
+
+  /* Effects */
+  --overlay: rgba(0, 0, 0, 0.8);
+  --shadow: rgba(0, 0, 0, 0.3);
+  --color-scheme: dark;
+}
+
+/* Tailwind v4 design tokens — make our vars available as utility classes */
 @theme inline {
   --color-base: var(--bg-base);
-  --color-gradient-end: var(--bg-gradient-end);
   --color-card: var(--bg-card);
   --color-panel: var(--bg-panel);
   --color-pill: var(--bg-pill);
-  --color-border: var(--border);
   --color-border-hover: var(--border-hover);
-  --color-primary: var(--text-primary);
-  --color-secondary: var(--text-secondary);
-  --color-muted: var(--text-muted);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-secondary: var(--accent-secondary);
-  --color-accent-link: var(--accent-link);
-  --color-on-accent: var(--on-accent);
-  --color-danger: var(--danger);
-  --color-danger-hover: var(--danger-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-link: var(--brand-link);
+  --color-on-brand: var(--on-brand);
   --color-warning: var(--warning);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* shadcn token bridge — exposes shadcn vars as Tailwind classes */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 html {
@@ -82,4 +194,13 @@ body {
   background: var(--bg-base);
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
 }

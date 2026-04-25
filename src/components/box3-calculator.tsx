@@ -60,7 +60,7 @@ export function Box3Calculator({
             <select
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
             >
               {YEARS.map((y) => (
                 <option key={y} value={y}>{y}</option>
@@ -76,7 +76,7 @@ export function Box3Calculator({
               step="any"
               value={wealth}
               onChange={(e) => setWealth(Number(e.target.value))}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
             />
           )}
           hint={`Auto-ingevuld vanuit huidige portfolio: ${fmtEur(initialWealth)}`}
@@ -141,11 +141,11 @@ export function Box3Calculator({
           type="button"
           onClick={onSaveSnapshot}
           disabled={pending}
-          className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-5 py-2.5 text-sm font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50"
+          className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-5 py-2.5 text-sm font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
         >
           {pending ? '...' : `Bewaar snapshot voor ${year}`}
         </button>
-        {saved && <span className="text-sm text-[var(--accent)]">Opgeslagen ✓</span>}
+        {saved && <span className="text-sm text-[var(--brand)]">Opgeslagen ✓</span>}
         {error && <span className="text-sm text-[var(--danger)]">{error}</span>}
       </div>
     </div>

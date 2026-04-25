@@ -39,7 +39,7 @@ export default async function DividendsPage() {
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link
             href="/dashboard"
-            className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-2xl font-black text-transparent"
+            className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent"
           >
             WealthSync
           </Link>
@@ -57,7 +57,7 @@ export default async function DividendsPage() {
           </div>
           <Link
             href="/dashboard"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]"
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--brand)]"
           >
             ← Dashboard
           </Link>

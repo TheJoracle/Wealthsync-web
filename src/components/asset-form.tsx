@@ -93,7 +93,7 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
           name="notes"
           rows={3}
           defaultValue={initial?.notes}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
       </div>
 
@@ -107,7 +107,7 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-6 py-3 font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50"
+          className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-6 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
         >
           {pending ? '...' : submitLabel}
         </button>
@@ -155,7 +155,7 @@ function Field({
         placeholder={placeholder}
         step={step}
         required={required}
-        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
       />
       {hint && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
     </div>
@@ -182,7 +182,7 @@ function Select({
         id={name}
         name={name}
         defaultValue={defaultValue}
-        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
       >
         {options.map((o) => (
           <option key={o} value={o}>

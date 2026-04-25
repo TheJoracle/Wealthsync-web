@@ -103,7 +103,7 @@ export function DividendTaxSummary({ dividends }: { dividends: DividendTaxRow[] 
           <select
             value={year ?? ''}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
           >
             {years.map((y) => (
               <option key={y} value={y}>{y}</option>
@@ -113,7 +113,7 @@ export function DividendTaxSummary({ dividends }: { dividends: DividendTaxRow[] 
             type="button"
             onClick={exportCsv}
             disabled={!year || filtered.length === 0}
-            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-primary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-50"
+            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-primary)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] disabled:opacity-50"
           >
             ⬇ Export CSV
           </button>
@@ -168,7 +168,7 @@ function Stat({
   value: string;
   tone?: 'neutral' | 'muted';
 }) {
-  const color = tone === 'muted' ? 'text-[var(--text-secondary)]' : 'text-[var(--accent)]';
+  const color = tone === 'muted' ? 'text-[var(--text-secondary)]' : 'text-[var(--brand)]';
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-4">
       <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{label}</p>

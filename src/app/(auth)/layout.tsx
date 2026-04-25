@@ -5,7 +5,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-[var(--border)] px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <h1 className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] bg-clip-text text-2xl font-black text-transparent">
+          <h1 className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-secondary)] bg-clip-text text-2xl font-black text-transparent">
             WealthSync
           </h1>
           <ThemeToggle />

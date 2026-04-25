@@ -76,7 +76,7 @@ export function TransactionsList({ transactions }: { transactions: TransactionRo
             onClick={() => setFilter(f)}
             className={`rounded px-3 py-1 text-sm transition ${
               filter === f
-                ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -105,7 +105,7 @@ export function TransactionsList({ transactions }: { transactions: TransactionRo
                 t.type === 'sell' || t.type === 'withdrawal'
                   ? 'text-[var(--danger)]'
                   : t.type === 'buy' || t.type === 'deposit'
-                    ? 'text-[var(--accent)]'
+                    ? 'text-[var(--brand)]'
                     : 'text-[var(--text-secondary)]';
               return (
                 <tr key={t.id} className="border-t border-[var(--border)]">
@@ -123,7 +123,7 @@ export function TransactionsList({ transactions }: { transactions: TransactionRo
                     <div className="flex justify-end gap-1">
                       <Link
                         href={`/transactions/${t.id}/edit`}
-                        className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                        className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-secondary)] hover:border-[var(--brand)] hover:text-[var(--brand)]"
                       >
                         Bewerk
                       </Link>

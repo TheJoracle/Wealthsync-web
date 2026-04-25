@@ -75,7 +75,7 @@ export function RetirementCalculator({ initialSavings }: { initialSavings: numbe
           onClick={() => setMode('forward')}
           className={`rounded-lg border px-4 py-2 text-sm transition ${
             mode === 'forward'
-              ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
+              ? 'border-[var(--brand)] bg-[var(--brand)]/10 text-[var(--brand)]'
               : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-hover)]'
           }`}
         >
@@ -86,7 +86,7 @@ export function RetirementCalculator({ initialSavings }: { initialSavings: numbe
           onClick={() => setMode('reverse')}
           className={`rounded-lg border px-4 py-2 text-sm transition ${
             mode === 'reverse'
-              ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
+              ? 'border-[var(--brand)] bg-[var(--brand)]/10 text-[var(--brand)]'
               : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-hover)]'
           }`}
         >
@@ -129,8 +129,8 @@ export function RetirementCalculator({ initialSavings }: { initialSavings: numbe
               <AreaChart data={forwardResult.yearByYear}>
                 <defs>
                   <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -154,7 +154,7 @@ export function RetirementCalculator({ initialSavings }: { initialSavings: numbe
                 <Area
                   type="monotone"
                   dataKey="balance"
-                  stroke="var(--accent)"
+                  stroke="var(--brand)"
                   strokeWidth={2}
                   fill="url(#balanceGradient)"
                 />
@@ -209,7 +209,7 @@ function Num({
         step={step ?? 'any'}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+        className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
       />
     </label>
   );
@@ -226,7 +226,7 @@ function Stat({
 }) {
   const color =
     tone === 'positive'
-      ? 'text-[var(--accent)]'
+      ? 'text-[var(--brand)]'
       : tone === 'muted'
         ? 'text-[var(--text-secondary)]'
         : 'text-[var(--text-primary)]';

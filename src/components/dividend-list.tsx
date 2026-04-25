@@ -80,7 +80,7 @@ export function DividendList({ dividends }: { dividends: DividendRow[] }) {
       <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-card)] p-8 text-center">
         <p className="text-[var(--text-secondary)]">
           Nog geen dividenden. Trigger een sync van Trading 212 op{' '}
-          <a href="/connections" className="text-[var(--accent)] hover:underline">
+          <a href="/connections" className="text-[var(--brand)] hover:underline">
             Connections
           </a>{' '}
           — die haalt automatisch ook je dividend-historie op.
@@ -98,7 +98,7 @@ export function DividendList({ dividends }: { dividends: DividendRow[] }) {
             onClick={() => setYearFilter('all')}
             className={`rounded px-3 py-1 text-sm transition ${
               yearFilter === 'all'
-                ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -111,7 +111,7 @@ export function DividendList({ dividends }: { dividends: DividendRow[] }) {
               onClick={() => setYearFilter(y)}
               className={`rounded px-3 py-1 text-sm transition ${
                 yearFilter === y
-                  ? 'bg-[var(--bg-panel)] text-[var(--accent)]'
+                  ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -202,7 +202,7 @@ function Stat({
   tone: 'positive' | 'muted';
 }) {
   const color =
-    tone === 'positive' ? 'text-[var(--accent)]' : 'text-[var(--text-secondary)]';
+    tone === 'positive' ? 'text-[var(--brand)]' : 'text-[var(--text-secondary)]';
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-4">
       <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{label}</p>

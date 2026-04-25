@@ -47,7 +47,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
           required
           defaultValue={initial?.name}
           placeholder="Bijv. Pensioen, eerste huis, vakantiegeld"
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
       </div>
 
@@ -62,7 +62,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
           step="any"
           required
           defaultValue={initial?.target_amount}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
       </div>
 
@@ -74,7 +74,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
           <button
             type="button"
             onClick={() => setCurrentAmount(portfolioValue)}
-            className="text-xs text-[var(--accent)] hover:underline"
+            className="text-xs text-[var(--brand)] hover:underline"
           >
             ⟳ Vul in vanuit portfolio (€{portfolioValue.toLocaleString('nl-NL', { maximumFractionDigits: 0 })})
           </button>
@@ -86,7 +86,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
           step="any"
           value={currentAmount}
           onChange={(e) => setCurrentAmount(Number(e.target.value))}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
       </div>
 
@@ -99,7 +99,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
           name="target_date"
           type="date"
           defaultValue={initial?.target_date ?? ''}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-[var(--brand)]"
         />
       </div>
 
@@ -113,7 +113,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] px-6 py-3 font-semibold text-[var(--on-accent)] transition hover:brightness-110 disabled:opacity-50"
+          className="rounded-lg bg-gradient-to-r from-[var(--brand)] to-[var(--brand-hover)] px-6 py-3 font-semibold text-[var(--on-brand)] transition hover:brightness-110 disabled:opacity-50"
         >
           {pending ? '...' : submitLabel}
         </button>
