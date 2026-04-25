@@ -9,6 +9,7 @@ export async function connectPlatform(formData: FormData) {
   const platform = String(formData.get('platform') ?? '') as Platform;
   const apiKey = String(formData.get('api_key') ?? '').trim();
   const apiSecret = String(formData.get('api_secret') ?? '').trim();
+  const mode = formData.get('mode') === 'demo' ? 'demo' : 'live';
 
   if (!PLATFORMS.includes(platform)) return { error: 'Unknown platform' };
   if (!apiKey) return { error: 'API key required' };
@@ -19,7 +20,7 @@ export async function connectPlatform(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  const payload = JSON.stringify({ api_key: apiKey, api_secret: apiSecret });
+  const payload = JSON.stringify({ api_key: apiKey, api_secret: apiSecret, mode });
   const encrypted = encrypt(payload);
 
   const { error } = await supabase.from('api_connections').upsert(

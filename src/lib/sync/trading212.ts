@@ -15,12 +15,14 @@ export type SyncResult = {
   total: number;
 };
 
-const TRADING212_URL = 'https://live.trading212.com/api/v0/equity/portfolio';
-
 /**
  * Fetch current positions from Trading 212 and upsert them into the assets
  * table. Positions are keyed by symbol — if an asset with the same symbol
  * already exists for this user, we update it; otherwise we insert.
+ *
+ * Trading 212 has separate environments: production trading runs on
+ * `live.trading212.com`, paper trading runs on `demo.trading212.com`.
+ * API keys generated in one environment are 401 on the other.
  *
  * Runs under a service_role Supabase client (cross-user trust boundary is
  * the /api/sync route that validated the session).
@@ -28,15 +30,21 @@ const TRADING212_URL = 'https://live.trading212.com/api/v0/equity/portfolio';
 export async function syncTrading212(
   supabase: SupabaseClient,
   userId: string,
-  credentials: { api_key: string },
+  credentials: { api_key: string; mode?: 'live' | 'demo' },
 ): Promise<SyncResult> {
-  const res = await fetch(TRADING212_URL, {
+  const host = credentials.mode === 'demo' ? 'demo.trading212.com' : 'live.trading212.com';
+  const url = `https://${host}/api/v0/equity/portfolio`;
+  const res = await fetch(url, {
     headers: { Authorization: credentials.api_key },
     cache: 'no-store',
   });
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Trading 212 returned ${res.status}: ${body.slice(0, 200)}`);
+    const hint =
+      res.status === 401
+        ? ` (key uit ${credentials.mode === 'demo' ? 'live' : 'practice'} account?)`
+        : '';
+    throw new Error(`Trading 212 ${host} returned ${res.status}${hint}: ${body.slice(0, 160)}`);
   }
 
   const positions = (await res.json()) as Trading212Position[];

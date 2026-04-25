@@ -144,6 +144,17 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
               />
             </div>
           )}
+          {platform === 'trading212' && (
+            <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+              <input
+                type="checkbox"
+                name="mode"
+                value="demo"
+                className="h-4 w-4 rounded border-[var(--border)] bg-[var(--bg-panel)]"
+              />
+              Practice / demo account
+            </label>
+          )}
           {error && (
             <div className="rounded-lg border border-[var(--danger)] bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
               {error}

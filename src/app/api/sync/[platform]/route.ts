@@ -32,7 +32,7 @@ export async function POST(
     return NextResponse.json({ error: 'Platform not connected' }, { status: 404 });
   }
 
-  let credentials: { api_key: string; api_secret: string };
+  let credentials: { api_key: string; api_secret: string; mode?: 'live' | 'demo' };
   try {
     credentials = JSON.parse(decrypt(connection.credentials_encrypted));
   } catch {
