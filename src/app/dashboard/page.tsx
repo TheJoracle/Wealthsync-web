@@ -20,7 +20,12 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const [{ data: assets }, { data: history }] = await Promise.all([
+  const [
+    { data: assets },
+    { data: history },
+    { data: benchmarks },
+    { data: benchmarkHistory },
+  ] = await Promise.all([
     supabase
       .from('assets')
       .select('id, name, symbol, type, amount, value')
@@ -28,6 +33,15 @@ export default async function DashboardPage() {
     supabase
       .from('portfolio_history')
       .select('date, total_value')
+      .order('date', { ascending: true }),
+    supabase
+      .from('benchmarks')
+      .select('id, name, symbol')
+      .eq('is_active', true)
+      .order('name'),
+    supabase
+      .from('benchmark_history')
+      .select('symbol, date, price')
       .order('date', { ascending: true }),
   ]);
 
@@ -39,6 +53,14 @@ export default async function DashboardPage() {
   const allocationRows = (assets ?? []).map((a) => ({
     type: a.type,
     value: Number(a.value),
+  }));
+
+  const benchmarkSeries = (benchmarks ?? []).map((b) => ({
+    symbol: b.symbol,
+    name: b.name,
+    points: (benchmarkHistory ?? [])
+      .filter((bh) => bh.symbol === b.symbol)
+      .map((bh) => ({ date: bh.date, price: Number(bh.price) })),
   }));
 
   return (
@@ -78,7 +100,7 @@ export default async function DashboardPage() {
         </section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
-          <PortfolioHistoryChart data={historyPoints} />
+          <PortfolioHistoryChart data={historyPoints} benchmarks={benchmarkSeries} />
           <AllocationChart data={allocationRows} />
         </section>
 
