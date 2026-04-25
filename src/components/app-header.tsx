@@ -12,7 +12,9 @@ import {
   PieChart,
   Plug,
   Receipt,
+  Settings,
   Target,
+  User,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -20,6 +22,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -34,10 +37,16 @@ const NAV_ITEMS = [
   { href: '/connections', label: 'Connecties', Icon: Plug },
 ] as const;
 
+const ACCOUNT_ITEMS = [
+  { href: '/settings', label: 'Instellingen', Icon: Settings },
+  { href: '/account', label: 'Account', Icon: User },
+] as const;
+
 export function AppHeader({ userEmail }: { userEmail?: string | null }) {
   const pathname = usePathname();
+  const allItems = [...NAV_ITEMS, ...ACCOUNT_ITEMS];
   const current =
-    NAV_ITEMS.find((n) => pathname === n.href || pathname.startsWith(`${n.href}/`)) ??
+    allItems.find((n) => pathname === n.href || pathname.startsWith(`${n.href}/`)) ??
     NAV_ITEMS[0];
   const CurrentIcon = current.Icon;
 
@@ -61,6 +70,13 @@ export function AppHeader({ userEmail }: { userEmail?: string | null }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-48">
               {NAV_ITEMS.map(({ href, label, Icon }) => (
+                <DropdownMenuItem key={href} render={<Link href={href} />}>
+                  <Icon className="size-4" />
+                  {label}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              {ACCOUNT_ITEMS.map(({ href, label, Icon }) => (
                 <DropdownMenuItem key={href} render={<Link href={href} />}>
                   <Icon className="size-4" />
                   {label}
