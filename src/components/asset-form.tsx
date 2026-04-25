@@ -24,6 +24,8 @@ type AssetFormValues = {
   value: number;
   purchase_price: number;
   notes: string;
+  sector: string;
+  geography: string;
 };
 
 type Props = {
@@ -123,6 +125,33 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
           defaultValue={initial?.purchase_price ?? 0}
         />
       </Field>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          label="Sector (optioneel)"
+          htmlFor="sector"
+          hint="Bijv. Technology, Energy, Healthcare"
+        >
+          <Input
+            id="sector"
+            name="sector"
+            defaultValue={initial?.sector ?? ''}
+            placeholder="Bijv. Technology"
+          />
+        </Field>
+        <Field
+          label="Geografie (optioneel)"
+          htmlFor="geography"
+          hint="Bijv. USA, Europe, Global, Emerging markets"
+        >
+          <Input
+            id="geography"
+            name="geography"
+            defaultValue={initial?.geography ?? ''}
+            placeholder="Bijv. Global"
+          />
+        </Field>
+      </div>
 
       <Field label="Notities (optioneel)" htmlFor="notes">
         <textarea

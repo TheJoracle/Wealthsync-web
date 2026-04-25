@@ -13,6 +13,8 @@ type AssetInput = {
   value: number;
   purchase_price: number;
   notes: string;
+  sector: string | null;
+  geography: string | null;
 };
 
 function parseForm(formData: FormData): { data?: AssetInput; error?: string } {
@@ -23,6 +25,10 @@ function parseForm(formData: FormData): { data?: AssetInput; error?: string } {
   const value = Number(formData.get('value'));
   const purchase_price = Number(formData.get('purchase_price') ?? 0);
   const notes = String(formData.get('notes') ?? '');
+  const sectorRaw = String(formData.get('sector') ?? '').trim();
+  const geographyRaw = String(formData.get('geography') ?? '').trim();
+  const sector = sectorRaw === '' ? null : sectorRaw;
+  const geography = geographyRaw === '' ? null : geographyRaw;
 
   if (!name) return { error: 'Name is required' };
   if (!symbol) return { error: 'Symbol is required' };
@@ -33,7 +39,9 @@ function parseForm(formData: FormData): { data?: AssetInput; error?: string } {
     return { error: 'Purchase price must be a non-negative number' };
   }
 
-  return { data: { name, symbol, type, amount, value, purchase_price, notes } };
+  return {
+    data: { name, symbol, type, amount, value, purchase_price, notes, sector, geography },
+  };
 }
 
 export async function addAsset(formData: FormData) {

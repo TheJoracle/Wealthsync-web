@@ -22,7 +22,7 @@ export default async function EditAssetPage({
 
   const { data: asset } = await supabase
     .from('assets')
-    .select('id, name, symbol, type, amount, value, purchase_price, notes')
+    .select('id, name, symbol, type, amount, value, purchase_price, notes, sector, geography')
     .eq('id', id)
     .single();
 
@@ -45,6 +45,8 @@ export default async function EditAssetPage({
           value: Number(asset.value),
           purchase_price: Number(asset.purchase_price ?? 0),
           notes: asset.notes ?? '',
+          sector: asset.sector ?? '',
+          geography: asset.geography ?? '',
         }}
         onSubmit={updateWithId}
         submitLabel="Wijzigingen opslaan"
