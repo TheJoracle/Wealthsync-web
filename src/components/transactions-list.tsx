@@ -4,6 +4,14 @@ import Link from 'next/link';
 import { useTransition, useState, useMemo } from 'react';
 import { deleteTransaction } from '@/app/transactions/actions';
 import { TRANSACTION_TYPE_LABELS, type TransactionType } from '@/app/transactions/types';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export type TransactionRow = {
   id: number;
@@ -68,21 +76,28 @@ export function TransactionsList({ transactions }: { transactions: TransactionRo
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-1 rounded-lg border border-[var(--border)] p-1">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => setFilter(f)}
-            className={`rounded px-3 py-1 text-sm transition ${
-              filter === f
-                ? 'bg-[var(--bg-panel)] text-[var(--brand)]'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {FILTER_LABELS[f]}
-          </button>
-        ))}
+      <div className="flex items-center gap-3">
+        <Label htmlFor="tx-filter" className="text-sm text-muted-foreground">
+          Filter
+        </Label>
+        <Select
+          value={filter}
+          onValueChange={(v) => v && setFilter(v as typeof FILTERS[number])}
+        >
+          <SelectTrigger id="tx-filter" className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {FILTERS.map((f) => (
+              <SelectItem key={f} value={f}>
+                {FILTER_LABELS[f]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-muted-foreground">
+          {filtered.length} transactie{filtered.length === 1 ? '' : 's'}
+        </span>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
