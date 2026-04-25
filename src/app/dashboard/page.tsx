@@ -5,6 +5,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { DeleteAssetButton } from '@/components/delete-asset-button';
 import { PortfolioHistoryChart } from '@/components/portfolio-history-chart';
 import { AllocationChart } from '@/components/allocation-chart';
+import { MetricsCards } from '@/components/metrics-cards';
 
 export const metadata = {
   title: 'Dashboard — WealthSync',
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     supabase
       .from('assets')
-      .select('id, name, symbol, type, amount, value')
+      .select('id, name, symbol, type, amount, value, purchase_price')
       .order('value', { ascending: false }),
     supabase
       .from('portfolio_history')
@@ -46,6 +47,10 @@ export default async function DashboardPage() {
   ]);
 
   const totalValue = (assets ?? []).reduce((sum, a) => sum + Number(a.value), 0);
+  const totalInvested = (assets ?? []).reduce(
+    (sum, a) => sum + Number(a.purchase_price ?? 0),
+    0,
+  );
   const historyPoints = (history ?? []).map((h) => ({
     date: h.date,
     total_value: Number(h.total_value),
@@ -99,6 +104,14 @@ export default async function DashboardPage() {
           </p>
         </section>
 
+        <section className="mt-6">
+          <MetricsCards
+            history={historyPoints}
+            currentValue={totalValue}
+            totalInvested={totalInvested}
+          />
+        </section>
+
         <section className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
           <PortfolioHistoryChart data={historyPoints} benchmarks={benchmarkSeries} />
           <AllocationChart data={allocationRows} />
@@ -122,36 +135,55 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {assets.map((asset) => (
-                <div
-                  key={asset.id}
-                  className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-4"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{asset.name}</p>
-                    <p className="truncate text-sm text-[var(--text-secondary)]">
-                      {asset.symbol} · {asset.type} · {Number(asset.amount).toLocaleString('nl-NL')}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-4">
-                    <p className="text-lg font-semibold">
-                      €{Number(asset.value).toLocaleString('nl-NL', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/assets/${asset.id}/edit`}
-                        className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                      >
-                        Bewerk
-                      </Link>
-                      <DeleteAssetButton id={asset.id} name={asset.name} />
+              {assets.map((asset) => {
+                const value = Number(asset.value);
+                const cost = Number(asset.purchase_price ?? 0);
+                const pnl = cost > 0 ? value - cost : null;
+                const pct = cost > 0 ? ((value - cost) / cost) * 100 : null;
+                const positive = pnl !== null && pnl >= 0;
+                return (
+                  <div
+                    key={asset.id}
+                    className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-6 py-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{asset.name}</p>
+                      <p className="truncate text-sm text-[var(--text-secondary)]">
+                        {asset.symbol} · {asset.type} · {Number(asset.amount).toLocaleString('nl-NL')}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-lg font-semibold">
+                          €{value.toLocaleString('nl-NL', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </p>
+                        {pct !== null && (
+                          <p
+                            className={`text-xs font-medium ${
+                              positive ? 'text-[var(--accent)]' : 'text-[var(--danger)]'
+                            }`}
+                          >
+                            {positive ? '+' : ''}€{pnl!.toLocaleString('nl-NL', { maximumFractionDigits: 0 })}{' '}
+                            ({positive ? '+' : ''}{pct.toFixed(1)}%)
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/assets/${asset.id}/edit`}
+                          className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                        >
+                          Bewerk
+                        </Link>
+                        <DeleteAssetButton id={asset.id} name={asset.name} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
