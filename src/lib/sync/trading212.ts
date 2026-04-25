@@ -80,6 +80,8 @@ export async function syncTrading212(
       .limit(1);
 
     if (existing && existing.length > 0) {
+      // Don't overwrite name/type on update — preserves user edits like
+      // a friendly fund name or a manual type re-classification.
       const { error } = await supabase
         .from('assets')
         .update({
@@ -118,8 +120,22 @@ function normalizeTicker(raw: string): string {
 }
 
 function guessAssetType(symbol: string): string {
-  // Heuristic — refine when we add per-asset metadata later.
-  // Most symbols Trading 212 exposes are shares/ETFs; users can correct.
-  if (/^(VWCE|VGWE|XLKS|QUTM|NUKL|IWDA|VUSA)$/i.test(symbol)) return 'ETF';
+  // Trading 212 tickers often have a trailing distribution-class letter
+  // (A/D/E/M for accumulating/distributing/etc.) on top of the exchange
+  // ticker. Strip it before matching so VWCED → VWCE, XLKSM → XLKS.
+  const upper = symbol.toUpperCase();
+  const base = upper.replace(/[ADEM]$/, '');
+
+  // Physical-metal ETCs (WisdomTree etc.)
+  if (/^(WGLD|WSLV|WPLT|WPAL|SGLN|PHGP)/.test(upper)) return 'Commodity';
+
+  // Common UCITS ETF tickers used by NL retail
+  const ETF_BASES = new Set([
+    'VWCE', 'VWRL', 'VGWE', 'IWDA', 'EUNL', 'EUNX', 'EUNK', 'VEVE',
+    'XLKS', 'QUTM', 'NUKL', 'VUSA', 'CSPX', 'SXR8', 'IUSA', 'IUSE',
+    'EQQQ', 'CNDX', 'IUSQ', 'AYEM', 'EMIM',
+  ]);
+  if (ETF_BASES.has(base) || ETF_BASES.has(upper)) return 'ETF';
+
   return 'Stock';
 }
