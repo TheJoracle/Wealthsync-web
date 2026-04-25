@@ -89,6 +89,12 @@ export default async function DashboardPage() {
               Dividenden
             </Link>
             <Link
+              href="/tax"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+            >
+              Belasting
+            </Link>
+            <Link
               href="/connections"
               className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
             >
