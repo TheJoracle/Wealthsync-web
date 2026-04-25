@@ -47,14 +47,16 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [type, setType] = useState<TransactionType>(initial?.type ?? 'buy');
-  const [qty, setQty] = useState(initial?.quantity ?? 0);
-  const [price, setPrice] = useState(initial?.price_per_unit ?? 0);
-  const [fees, setFees] = useState(initial?.fees ?? 0);
-  const [total, setTotal] = useState(initial?.total_value ?? 0);
+  // String state: lets the user clear the field without it snapping back to 0.
+  const [qty, setQty] = useState(initial?.quantity !== undefined ? String(initial.quantity) : '');
+  const [price, setPrice] = useState(initial?.price_per_unit !== undefined ? String(initial.price_per_unit) : '');
+  const [fees, setFees] = useState(initial?.fees !== undefined ? String(initial.fees) : '0');
+  const [total, setTotal] = useState(initial?.total_value !== undefined ? String(initial.total_value) : '');
   const [totalDirty, setTotalDirty] = useState(false);
 
-  const autoTotal = qty * price + fees;
-  const effectiveTotal = totalDirty ? total : autoTotal;
+  const num = (s: string) => Number(s) || 0;
+  const autoTotal = num(qty) * num(price) + num(fees);
+  const effectiveTotal = totalDirty ? num(total) : autoTotal;
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -124,7 +126,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             name="quantity"
             required
             value={qty}
-            onChange={(e) => setQty(Number(e.target.value))}
+            onChange={(e) => setQty(e.target.value)}
           />
         </Field>
         <Field label="Prijs per stuk (€)" htmlFor="price_per_unit" required>
@@ -135,7 +137,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             name="price_per_unit"
             required
             value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            onChange={(e) => setPrice(e.target.value)}
           />
         </Field>
         <Field label="Kosten (€)" htmlFor="fees">
@@ -145,7 +147,7 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
             step="any"
             name="fees"
             value={fees}
-            onChange={(e) => setFees(Number(e.target.value))}
+            onChange={(e) => setFees(e.target.value)}
           />
         </Field>
       </div>
@@ -159,9 +161,9 @@ export function TransactionForm({ initial, assets, onSubmit, submitLabel }: Prop
           id="total_value_field"
           type="number"
           step="any"
-          value={effectiveTotal}
+          value={totalDirty ? total : String(effectiveTotal)}
           onChange={(e) => {
-            setTotal(Number(e.target.value));
+            setTotal(e.target.value);
             setTotalDirty(true);
           }}
         />

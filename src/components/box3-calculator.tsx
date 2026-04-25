@@ -28,16 +28,17 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = [CURRENT_YEAR + 1, CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2];
 
 export function Box3Calculator({ initialWealth }: { initialWealth: number }) {
-  const [wealth, setWealth] = useState(initialWealth);
+  const [wealth, setWealth] = useState(String(initialWealth));
   const [year, setYear] = useState(CURRENT_YEAR);
   const [couple, setCouple] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
 
+  const wealthNum = Number(wealth) || 0;
   const result = useMemo(
-    () => calculateBox3(wealth, { year, couple }),
-    [wealth, year, couple],
+    () => calculateBox3(wealthNum, { year, couple }),
+    [wealthNum, year, couple],
   );
 
   function onSaveSnapshot() {
@@ -45,7 +46,7 @@ export function Box3Calculator({ initialWealth }: { initialWealth: number }) {
     setSaved(false);
     const fd = new FormData();
     fd.set('year', String(year));
-    fd.set('wealth', String(wealth));
+    fd.set('wealth', String(wealthNum));
     if (couple) fd.set('couple', 'on');
     startTransition(async () => {
       const r = await saveBox3Snapshot(fd);
@@ -84,7 +85,7 @@ export function Box3Calculator({ initialWealth }: { initialWealth: number }) {
               type="number"
               step="any"
               value={wealth}
-              onChange={(e) => setWealth(Number(e.target.value))}
+              onChange={(e) => setWealth(e.target.value)}
             />
             <span className="text-xs text-muted-foreground">
               Auto-ingevuld vanuit huidige portfolio: {fmtEur(initialWealth)}

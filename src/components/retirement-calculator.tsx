@@ -28,37 +28,40 @@ type Mode = 'forward' | 'reverse';
 export function RetirementCalculator({ initialSavings }: { initialSavings: number }) {
   const [mode, setMode] = useState<Mode>('forward');
 
-  // Shared inputs
-  const [currentAge, setCurrentAge] = useState(30);
-  const [retirementAge, setRetirementAge] = useState(67);
-  const [currentSavings, setCurrentSavings] = useState(initialSavings);
-  const [annualReturn, setAnnualReturn] = useState(7);
+  // Shared inputs (kept as strings so the input doesn't fight the user when
+  // the field is briefly empty during edits)
+  const [currentAge, setCurrentAge] = useState('30');
+  const [retirementAge, setRetirementAge] = useState('67');
+  const [currentSavings, setCurrentSavings] = useState(String(initialSavings));
+  const [annualReturn, setAnnualReturn] = useState('7');
 
   // Forward-only
-  const [monthlyContribution, setMonthlyContribution] = useState(500);
+  const [monthlyContribution, setMonthlyContribution] = useState('500');
 
   // Reverse-only
-  const [targetAmount, setTargetAmount] = useState(1_000_000);
+  const [targetAmount, setTargetAmount] = useState('1000000');
+
+  const num = (s: string) => Number(s) || 0;
 
   const forwardResult: ForwardResult | null = useMemo(() => {
     if (mode !== 'forward') return null;
     return projectForward({
-      currentAge,
-      retirementAge,
-      currentSavings,
-      monthlyContribution,
-      annualReturn: annualReturn / 100,
+      currentAge: num(currentAge),
+      retirementAge: num(retirementAge),
+      currentSavings: num(currentSavings),
+      monthlyContribution: num(monthlyContribution),
+      annualReturn: num(annualReturn) / 100,
     });
   }, [mode, currentAge, retirementAge, currentSavings, monthlyContribution, annualReturn]);
 
   const requiredPmt = useMemo(() => {
     if (mode !== 'reverse') return null;
     return solveRequiredContribution({
-      currentAge,
-      targetAge: retirementAge,
-      currentSavings,
-      targetAmount,
-      annualReturn: annualReturn / 100,
+      currentAge: num(currentAge),
+      targetAge: num(retirementAge),
+      currentSavings: num(currentSavings),
+      targetAmount: num(targetAmount),
+      annualReturn: num(annualReturn) / 100,
     });
   }, [mode, currentAge, retirementAge, currentSavings, targetAmount, annualReturn]);
 
@@ -95,24 +98,24 @@ export function RetirementCalculator({ initialSavings }: { initialSavings: numbe
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Num label="Huidige leeftijd" value={currentAge} onChange={setCurrentAge} step={1} />
-        <Num label={mode === 'reverse' ? 'Doelleeftijd' : 'Pensioenleeftijd'} value={retirementAge} onChange={setRetirementAge} step={1} />
-        <Num label="Huidig vermogen (€)" value={currentSavings} onChange={setCurrentSavings} step={100} />
-        <Num label="Verwacht jaarrendement (%)" value={annualReturn} onChange={setAnnualReturn} step={0.1} />
+        <Num label="Huidige leeftijd" value={currentAge} onChange={setCurrentAge} step="1" />
+        <Num label={mode === 'reverse' ? 'Doelleeftijd' : 'Pensioenleeftijd'} value={retirementAge} onChange={setRetirementAge} step="1" />
+        <Num label="Huidig vermogen (€)" value={currentSavings} onChange={setCurrentSavings} step="100" />
+        <Num label="Verwacht jaarrendement (%)" value={annualReturn} onChange={setAnnualReturn} step="0.1" />
 
         {mode === 'forward' ? (
           <Num
             label="Maandelijkse inleg (€)"
             value={monthlyContribution}
             onChange={setMonthlyContribution}
-            step={50}
+            step="50"
           />
         ) : (
           <Num
             label="Doelbedrag (€)"
             value={targetAmount}
             onChange={setTargetAmount}
-            step={10_000}
+            step="10000"
           />
         )}
       </div>
@@ -181,7 +184,7 @@ export function RetirementCalculator({ initialSavings }: { initialSavings: numbe
           />
           <Stat
             label="Aantal jaren tot doel"
-            value={`${retirementAge - currentAge} jaar`}
+            value={`${num(retirementAge) - num(currentAge)} jaar`}
             tone="muted"
           />
         </div>
@@ -197,9 +200,9 @@ function Num({
   step,
 }: {
   label: string;
-  value: number;
-  onChange: (v: number) => void;
-  step?: number;
+  value: string;
+  onChange: (v: string) => void;
+  step?: string;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -208,7 +211,7 @@ function Num({
         type="number"
         step={step ?? 'any'}
         value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={(e) => onChange(e.target.value)}
         className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--brand)]"
       />
     </label>

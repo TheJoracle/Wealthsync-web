@@ -43,7 +43,7 @@ export function AlertsManager({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [assetId, setAssetId] = useState<number>(assets[0]?.id ?? 0);
-  const [target, setTarget] = useState(0);
+  const [target, setTarget] = useState('');
   const [condition, setCondition] = useState<'above' | 'below'>('above');
 
   const selectedAsset = assets.find((a) => a.id === assetId);
@@ -137,7 +137,7 @@ export function AlertsManager({
                 name="target_price"
                 required
                 value={target}
-                onChange={(e) => setTarget(Number(e.target.value))}
+                onChange={(e) => setTarget(e.target.value)}
               />
             </div>
 

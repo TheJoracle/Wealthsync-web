@@ -26,7 +26,9 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [currentAmount, setCurrentAmount] = useState(initial?.current_amount ?? 0);
+  const [currentAmount, setCurrentAmount] = useState(
+    initial?.current_amount !== undefined ? String(initial.current_amount) : '0',
+  );
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,7 +75,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
           <Label htmlFor="current_amount">Huidig bedrag (€)</Label>
           <button
             type="button"
-            onClick={() => setCurrentAmount(portfolioValue)}
+            onClick={() => setCurrentAmount(String(portfolioValue))}
             className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
           >
             <RefreshCw className="size-3" />
@@ -86,7 +88,7 @@ export function GoalForm({ initial, portfolioValue, onSubmit, submitLabel }: Pro
           type="number"
           step="any"
           value={currentAmount}
-          onChange={(e) => setCurrentAmount(Number(e.target.value))}
+          onChange={(e) => setCurrentAmount(e.target.value)}
         />
       </div>
 
