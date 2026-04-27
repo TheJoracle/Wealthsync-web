@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { enrichTicker } from '@/lib/asset-metadata';
-import { ASSET_TYPES, type AssetType } from '@/app/assets/types';
+import { ASSET_TYPES, FIELD_RULES, type AssetType } from '@/app/assets/types';
 
 type AssetInput = {
   name: string;
@@ -21,25 +21,44 @@ type AssetInput = {
 
 function parseForm(formData: FormData): { data?: AssetInput; error?: string } {
   const name = String(formData.get('name') ?? '').trim();
-  const symbol = String(formData.get('symbol') ?? '').trim().toUpperCase();
   const type = String(formData.get('type') ?? '').trim() as AssetType;
-  const amount = Number(formData.get('amount'));
+  if (!name) return { error: 'Naam is verplicht' };
+  if (!ASSET_TYPES.includes(type)) return { error: 'Ongeldig asset-type' };
+
+  const rules = FIELD_RULES[type];
+
+  // Symbol: required → must, optional → may, hidden → fall back to name-based default
+  let symbol = String(formData.get('symbol') ?? '').trim().toUpperCase();
+  if (rules.symbol === 'required' && !symbol) {
+    return { error: `${rules.symbolLabel} is verplicht voor ${type}` };
+  }
+  if (!symbol) symbol = name.toUpperCase().replace(/\s+/g, '_').slice(0, 32);
+
+  // Amount: positive number when required; default 1 when hidden
+  let amount = Number(formData.get('amount'));
+  if (rules.amount === 'required') {
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return { error: `${rules.amountLabel} moet een positief getal zijn` };
+    }
+  } else if (rules.amount === 'hidden' || !Number.isFinite(amount) || amount <= 0) {
+    amount = 1;
+  }
+
   const value = Number(formData.get('value'));
+  if (!Number.isFinite(value) || value < 0) {
+    return { error: 'Huidige waarde moet een niet-negatief getal zijn' };
+  }
+
   const purchase_price = Number(formData.get('purchase_price') ?? 0);
+  if (!Number.isFinite(purchase_price) || purchase_price < 0) {
+    return { error: 'Aankoopprijs moet een niet-negatief getal zijn' };
+  }
+
   const notes = String(formData.get('notes') ?? '');
   const sectorRaw = String(formData.get('sector') ?? '').trim();
   const geographyRaw = String(formData.get('geography') ?? '').trim();
   const sector = sectorRaw === '' ? null : sectorRaw;
   const geography = geographyRaw === '' ? null : geographyRaw;
-
-  if (!name) return { error: 'Name is required' };
-  if (!symbol) return { error: 'Symbol is required' };
-  if (!ASSET_TYPES.includes(type)) return { error: 'Invalid asset type' };
-  if (!Number.isFinite(amount) || amount <= 0) return { error: 'Amount must be a positive number' };
-  if (!Number.isFinite(value) || value < 0) return { error: 'Value must be a non-negative number' };
-  if (!Number.isFinite(purchase_price) || purchase_price < 0) {
-    return { error: 'Purchase price must be a non-negative number' };
-  }
 
   return {
     data: { name, symbol, type, amount, value, purchase_price, notes, sector, geography },
