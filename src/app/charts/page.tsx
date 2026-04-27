@@ -4,7 +4,9 @@ import { AppHeader } from '@/components/app-header';
 import { TypeGrowthChart, type TypeHistoryPoint } from '@/components/type-growth-chart';
 import { BreakdownChart } from '@/components/breakdown-chart';
 import { ConcentrationCard } from '@/components/concentration-card';
+import { CorrelationCard } from '@/components/correlation-card';
 import { RebalanceTool } from '@/components/rebalance-tool';
+import { computePairwiseCorrelations, type Series } from '@/lib/correlation';
 
 export const metadata = { title: 'Charts — WealthSync' };
 
@@ -21,18 +23,46 @@ export default async function ChartsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const [{ data: assets }, { data: history }] = await Promise.all([
+  const [
+    { data: assets },
+    { data: history },
+    { data: priceHistory },
+  ] = await Promise.all([
     supabase
       .from('assets')
-      .select('symbol, type, value, sector, geography')
+      .select('id, symbol, name, type, value, sector, geography')
       .order('value', { ascending: false })
-      .returns<AssetSlice[]>(),
+      .returns<(AssetSlice & { id: number; name: string })[]>(),
     supabase
       .from('portfolio_history')
       .select('date, etf_value, crypto_value, commodity_value, stock_value')
       .order('date', { ascending: true })
       .returns<TypeHistoryPoint[]>(),
+    supabase
+      .from('asset_price_history')
+      .select('asset_id, date, price')
+      .order('date', { ascending: true }),
   ]);
+
+  // Build per-asset price series for correlation
+  const seriesByAssetId = new Map<number, { date: string; price: number }[]>();
+  for (const row of priceHistory ?? []) {
+    const aid = Number(row.asset_id);
+    if (!seriesByAssetId.has(aid)) seriesByAssetId.set(aid, []);
+    seriesByAssetId.get(aid)!.push({
+      date: String(row.date).slice(0, 10),
+      price: Number(row.price),
+    });
+  }
+  const correlationSeries: Series[] = (assets ?? [])
+    .map((a) => ({
+      symbol: a.symbol,
+      name: a.name,
+      points: seriesByAssetId.get(a.id) ?? [],
+    }))
+    .filter((s) => s.points.length >= 5);
+  const correlationPairs = computePairwiseCorrelations(correlationSeries);
+  const correlationSymbols = correlationSeries.map((s) => s.symbol);
 
   const breakdownInput = (assets ?? []).map((a) => ({
     label: a.symbol,
@@ -70,6 +100,8 @@ export default async function ChartsPage() {
             values={breakdownInput.map((r) => r.value)}
             topSymbol={breakdownInput[0]?.label ?? ''}
           />
+
+          <CorrelationCard pairs={correlationPairs} symbols={correlationSymbols} />
 
           <RebalanceTool
             assets={(assets ?? []).map((a) => ({
