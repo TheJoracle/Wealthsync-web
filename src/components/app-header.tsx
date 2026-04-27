@@ -17,6 +17,7 @@ import {
   User,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { LanguageToggle } from '@/components/language-toggle';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/lib/i18n/client';
 import type { MessageKey } from '@/lib/i18n/dictionaries';
@@ -94,6 +95,7 @@ export function AppHeader({ userEmail }: { userEmail?: string | null }) {
               {userEmail}
             </span>
           )}
+          <LanguageToggle />
           <ThemeToggle />
           <form action="/logout" method="post">
             <Button type="submit" variant="ghost" size="icon" title={t('nav.logout')}>
