@@ -90,9 +90,18 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
       if (!res.ok) {
         setError(data.error ?? `Backfill failed (${res.status})`);
       } else {
-        setInfo(
-          `${data.inserted} transacties geïmporteerd uit ${data.total} orders (${data.skipped} overgeslagen).`,
-        );
+        const parts = [
+          `${data.inserted} transacties geïmporteerd uit ${data.total} orders`,
+          data.skipped ? `${data.skipped} overgeslagen` : null,
+        ]
+          .filter(Boolean)
+          .join(' · ');
+        const tail = data.rateLimited
+          ? ' — Trading 212 heeft rate-limited, klik na ~1 minuut opnieuw voor de rest.'
+          : data.more
+            ? ' — Er zijn nog oudere orders, klik nogmaals om verder te gaan.'
+            : '';
+        setInfo(parts + tail);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Backfill failed');

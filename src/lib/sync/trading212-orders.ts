@@ -22,7 +22,17 @@ export type OrderBackfillResult = {
   inserted: number;
   skipped: number;
   total: number;
+  rateLimited?: boolean;
+  more?: boolean;
 };
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+// Trading 212 caps history endpoints at ~1 request per 5 seconds. We
+// pre-emptively wait between pages and stop early on a 429 so the user can
+// retry later — dedup on tax_lot_id makes that safe.
+const PAGE_DELAY_MS = 6000;
+const MAX_PAGES_PER_CALL = 8; // ≈400 orders, well under Vercel hobby's 60s
 
 /**
  * Pull complete equity-order history from Trading 212 and insert each filled
@@ -65,9 +75,12 @@ export async function backfillTrading212Orders(
   let skipped = 0;
   let total = 0;
   let cursor: string | null = null;
-  const HARD_CAP = 5000;
+  let rateLimited = false;
+  let more = false;
 
-  while (total < HARD_CAP) {
+  for (let page = 0; page < MAX_PAGES_PER_CALL; page++) {
+    if (page > 0) await sleep(PAGE_DELAY_MS);
+
     const url = new URL(`https://${host}/api/v0/equity/history/orders`);
     url.searchParams.set('limit', '50');
     if (cursor) url.searchParams.set('cursor', cursor);
@@ -76,6 +89,13 @@ export async function backfillTrading212Orders(
       headers: { Authorization: authHeader, Accept: 'application/json' },
       cache: 'no-store',
     });
+    if (res.status === 429) {
+      // Hit T212's rate limit — stop here, mark "more available" so user
+      // knows to retry. Dedup keeps it safe.
+      rateLimited = true;
+      more = true;
+      break;
+    }
     if (!res.ok) {
       const body = await res.text();
       throw new Error(
@@ -146,7 +166,9 @@ export async function backfillTrading212Orders(
     } catch {
       break;
     }
+    // If we hit our per-call page cap and there are more pages, signal it
+    if (page === MAX_PAGES_PER_CALL - 1) more = true;
   }
 
-  return { inserted, skipped, total };
+  return { inserted, skipped, total, rateLimited, more };
 }
