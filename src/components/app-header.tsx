@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/lib/i18n/client';
+import type { MessageKey } from '@/lib/i18n/dictionaries';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,23 +29,24 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard', Icon: BarChart3 },
-  { href: '/charts', label: 'Charts', Icon: PieChart },
-  { href: '/transactions', label: 'Transacties', Icon: Receipt },
-  { href: '/dividends', label: 'Dividenden', Icon: Coins },
-  { href: '/goals', label: 'Doelen', Icon: Target },
-  { href: '/tax', label: 'Belasting', Icon: Calculator },
-  { href: '/alerts', label: 'Alerts', Icon: Bell },
-  { href: '/connections', label: 'Connecties', Icon: Plug },
+  { href: '/dashboard', key: 'nav.dashboard' as MessageKey, Icon: BarChart3 },
+  { href: '/charts', key: 'nav.charts' as MessageKey, Icon: PieChart },
+  { href: '/transactions', key: 'nav.transactions' as MessageKey, Icon: Receipt },
+  { href: '/dividends', key: 'nav.dividends' as MessageKey, Icon: Coins },
+  { href: '/goals', key: 'nav.goals' as MessageKey, Icon: Target },
+  { href: '/tax', key: 'nav.tax' as MessageKey, Icon: Calculator },
+  { href: '/alerts', key: 'nav.alerts' as MessageKey, Icon: Bell },
+  { href: '/connections', key: 'nav.connections' as MessageKey, Icon: Plug },
 ] as const;
 
 const ACCOUNT_ITEMS = [
-  { href: '/settings', label: 'Instellingen', Icon: Settings },
-  { href: '/account', label: 'Account', Icon: User },
+  { href: '/settings', key: 'nav.settings' as MessageKey, Icon: Settings },
+  { href: '/account', key: 'nav.account' as MessageKey, Icon: User },
 ] as const;
 
 export function AppHeader({ userEmail }: { userEmail?: string | null }) {
   const pathname = usePathname();
+  const t = useT();
   const allItems = [...NAV_ITEMS, ...ACCOUNT_ITEMS];
   const current =
     allItems.find((n) => pathname === n.href || pathname.startsWith(`${n.href}/`)) ??
@@ -65,21 +68,21 @@ export function AppHeader({ userEmail }: { userEmail?: string | null }) {
               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted"
             >
               <CurrentIcon className="size-4" />
-              {current.label}
+              {t(current.key)}
               <ChevronDown className="size-4 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-48">
-              {NAV_ITEMS.map(({ href, label, Icon }) => (
+              {NAV_ITEMS.map(({ href, key, Icon }) => (
                 <DropdownMenuItem key={href} render={<Link href={href} />}>
                   <Icon className="size-4" />
-                  {label}
+                  {t(key)}
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              {ACCOUNT_ITEMS.map(({ href, label, Icon }) => (
+              {ACCOUNT_ITEMS.map(({ href, key, Icon }) => (
                 <DropdownMenuItem key={href} render={<Link href={href} />}>
                   <Icon className="size-4" />
-                  {label}
+                  {t(key)}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -93,7 +96,7 @@ export function AppHeader({ userEmail }: { userEmail?: string | null }) {
           )}
           <ThemeToggle />
           <form action="/logout" method="post">
-            <Button type="submit" variant="ghost" size="icon" title="Uitloggen">
+            <Button type="submit" variant="ghost" size="icon" title={t('nav.logout')}>
               <LogOut className="size-4" />
             </Button>
           </form>

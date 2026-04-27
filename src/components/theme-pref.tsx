@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/lib/i18n/client';
 
 type Theme = 'dark' | 'light';
 
 export function ThemePref() {
+  const t = useT();
   const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export function ThemePref() {
         onClick={() => setMode('light')}
       >
         <Sun className="size-4" />
-        Licht
+        {t('settings.theme.light')}
       </Button>
       <Button
         type="button"
@@ -37,7 +39,7 @@ export function ThemePref() {
         onClick={() => setMode('dark')}
       >
         <Moon className="size-4" />
-        Donker
+        {t('settings.theme.dark')}
       </Button>
     </div>
   );

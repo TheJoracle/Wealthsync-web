@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeScript } from '@/components/theme-script';
+import { LocaleProvider } from '@/lib/i18n/client';
+import { getLocale } from '@/lib/i18n/server';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -18,21 +20,24 @@ export const metadata: Metadata = {
   description: 'Track your portfolio across brokers and asset classes',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
     <html
-      lang="nl"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
         <ThemeScript />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <LocaleProvider locale={locale}>{children}</LocaleProvider>
+      </body>
     </html>
   );
 }
