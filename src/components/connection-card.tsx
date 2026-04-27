@@ -101,7 +101,15 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
           : data.more
             ? ' — Er zijn nog oudere orders, klik nogmaals om verder te gaan.'
             : '';
-        setInfo(parts + tail);
+        // If 0 inserted and we have skip reasons, show a quick breakdown
+        let debug = '';
+        if (data.inserted === 0 && data.reasons) {
+          const reasonStr = Object.entries(data.reasons as Record<string, number>)
+            .map(([k, v]) => `${v}× ${k}`)
+            .join(', ');
+          debug = `\n\nReden van overslaan: ${reasonStr}`;
+        }
+        setInfo(parts + tail + debug);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Backfill failed');
@@ -240,7 +248,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
           </div>
         )}
         {info && (
-          <div className="mt-3 rounded-md border border-primary/50 bg-primary/10 px-4 py-3 text-sm text-primary">
+          <div className="mt-3 whitespace-pre-line rounded-md border border-primary/50 bg-primary/10 px-4 py-3 text-sm text-primary">
             {info}
           </div>
         )}

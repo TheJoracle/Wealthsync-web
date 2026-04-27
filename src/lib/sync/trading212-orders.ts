@@ -24,6 +24,8 @@ export type OrderBackfillResult = {
   total: number;
   rateLimited?: boolean;
   more?: boolean;
+  reasons?: Record<string, number>;
+  sample?: unknown;
 };
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -77,6 +79,12 @@ export async function backfillTrading212Orders(
   let cursor: string | null = null;
   let rateLimited = false;
   let more = false;
+  const reasons: Record<string, number> = {};
+  const bump = (k: string) => {
+    reasons[k] = (reasons[k] ?? 0) + 1;
+    skipped++;
+  };
+  let sample: unknown = null;
 
   for (let page = 0; page < MAX_PAGES_PER_CALL; page++) {
     if (page > 0) await sleep(PAGE_DELAY_MS);
@@ -108,31 +116,41 @@ export async function backfillTrading212Orders(
 
     for (const o of items) {
       total++;
-      // Only count actually-filled orders (FILLED, EXECUTED). Skip CANCELLED / PENDING.
-      if (!/fill|execut/i.test(o.status)) {
-        skipped++;
+      if (sample === null) sample = o;
+
+      // Only the filledQuantity field is the real signal — status strings
+      // vary across order types. If the order partially or fully filled
+      // we want it; if it didn't fill at all (cancelled/rejected/pending),
+      // filledQuantity will be 0 or missing.
+      const qty = Number(o.filledQuantity ?? 0);
+      if (!Number.isFinite(qty) || qty === 0) {
+        bump(`unfilled (${o.status ?? 'no-status'})`);
         continue;
       }
-      const qty = Number(o.filledQuantity ?? o.orderedQuantity ?? 0);
-      if (qty === 0) {
-        skipped++;
+
+      const externalId = String(o.fillId ?? o.id ?? '').replace(/^(undefined|null)$/, '');
+      if (!externalId) {
+        bump('no-id');
         continue;
       }
-      const externalId = String(o.fillId ?? o.id ?? '');
-      if (!externalId || seenIds.has(externalId)) {
-        skipped++;
+      if (seenIds.has(externalId)) {
+        bump('duplicate');
         continue;
       }
 
       const symbol = (o.ticker ?? '').split('_')[0].toUpperCase();
-      // T212 uses positive qty for buys, negative for sells.
+      if (!symbol) {
+        bump('no-ticker');
+        continue;
+      }
+
       const side = qty < 0 ? 'sell' : 'buy';
       const absQty = Math.abs(qty);
       const price = Number(o.fillPrice ?? o.limitPrice ?? 0);
       const total_value = Number(o.filledValue ?? absQty * price);
       const date = o.dateExecuted ?? o.dateModified ?? o.dateCreated;
       if (!date) {
-        skipped++;
+        bump('no-date');
         continue;
       }
 
@@ -151,7 +169,7 @@ export async function backfillTrading212Orders(
         notes: `t212-backfill:${o.type ?? 'order'}`,
       });
       if (error) {
-        skipped++;
+        bump(`insert-error: ${error.message.slice(0, 60)}`);
         continue;
       }
       seenIds.add(externalId);
@@ -170,5 +188,5 @@ export async function backfillTrading212Orders(
     if (page === MAX_PAGES_PER_CALL - 1) more = true;
   }
 
-  return { inserted, skipped, total, rateLimited, more };
+  return { inserted, skipped, total, rateLimited, more, reasons, sample };
 }
