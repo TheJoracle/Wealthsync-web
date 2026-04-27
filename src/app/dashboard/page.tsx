@@ -156,12 +156,15 @@ export default async function DashboardPage() {
                 return (
                   <Card key={asset.id}>
                     <CardContent className="flex items-center justify-between gap-3 px-6 py-4">
-                      <div className="min-w-0">
+                      <Link
+                        href={`/assets/${asset.id}`}
+                        className="min-w-0 flex-1 transition hover:opacity-70"
+                      >
                         <p className="truncate font-semibold">{asset.name}</p>
                         <p className="truncate text-sm text-muted-foreground">
                           {asset.symbol} · {asset.type} · {Number(asset.amount).toLocaleString('nl-NL')}
                         </p>
-                      </div>
+                      </Link>
                       <div className="flex shrink-0 items-center gap-4">
                         <div className="text-right tabular-nums">
                           <p className="text-lg font-semibold">
