@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, Upload } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { AppHeader } from '@/components/app-header';
 import { buttonVariants } from '@/components/ui/button';
@@ -47,10 +47,19 @@ export default async function TransactionsPage() {
               Volledige historie van aan- en verkopen, dividenden en stortingen.
             </p>
           </div>
-          <Link href="/transactions/new" className={buttonVariants({ size: 'lg' })}>
-            <Plus />
-            Nieuwe transactie
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href="/transactions/import"
+              className={buttonVariants({ variant: 'outline', size: 'lg' })}
+            >
+              <Upload />
+              CSV-import
+            </Link>
+            <Link href="/transactions/new" className={buttonVariants({ size: 'lg' })}>
+              <Plus />
+              Nieuwe transactie
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-6">
