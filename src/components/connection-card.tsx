@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { History, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { connectPlatform, disconnectPlatform } from '@/app/connections/actions';
 import {
   PLATFORM_FIELDS,
@@ -40,6 +40,8 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
   const [apiSecret, setApiSecret] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -65,6 +67,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
 
   async function onSync() {
     setError(null);
+    setInfo(null);
     setSyncing(true);
     try {
       const res = await fetch(`/api/sync/${platform}`, { method: 'POST' });
@@ -74,6 +77,27 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
       setError(e instanceof Error ? e.message : 'Sync failed');
     } finally {
       setSyncing(false);
+    }
+  }
+
+  async function onBackfill() {
+    setError(null);
+    setInfo(null);
+    setBackfilling(true);
+    try {
+      const res = await fetch(`/api/sync/${platform}/backfill`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? `Backfill failed (${res.status})`);
+      } else {
+        setInfo(
+          `${data.inserted} transacties geïmporteerd uit ${data.total} orders (${data.skipped} overgeslagen).`,
+        );
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Backfill failed');
+    } finally {
+      setBackfilling(false);
     }
   }
 
@@ -97,13 +121,25 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
               <p className="mt-1 text-sm text-destructive">Laatste fout: {lastError}</p>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {connected ? (
               <>
-                <Button onClick={onSync} disabled={syncing || pending} size="lg">
+                <Button onClick={onSync} disabled={syncing || pending || backfilling} size="lg">
                   {syncing ? <Loader2 className="animate-spin" /> : <RefreshCw />}
                   {syncing ? 'Syncing...' : 'Sync nu'}
                 </Button>
+                {platform === 'trading212' && (
+                  <Button
+                    onClick={onBackfill}
+                    disabled={syncing || pending || backfilling}
+                    variant="outline"
+                    size="lg"
+                    title="Importeer alle historische orders (eenmalig)"
+                  >
+                    {backfilling ? <Loader2 className="animate-spin" /> : <History />}
+                    {backfilling ? 'Bezig...' : 'Backfill historie'}
+                  </Button>
+                )}
                 <AlertDialog>
                   <AlertDialogTrigger
                     className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 text-sm hover:bg-muted"
@@ -192,6 +228,11 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
         {error && connected && (
           <div className="mt-3 rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {error}
+          </div>
+        )}
+        {info && (
+          <div className="mt-3 rounded-md border border-primary/50 bg-primary/10 px-4 py-3 text-sm text-primary">
+            {info}
           </div>
         )}
       </CardContent>
