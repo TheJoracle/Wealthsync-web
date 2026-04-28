@@ -1,21 +1,26 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-type T212Order = {
-  type: string;
-  id: number | string;
-  fillId?: number | string;
-  parentOrder?: number | string;
-  ticker: string;
-  orderedQuantity?: number;
-  filledQuantity?: number;
-  limitPrice?: number;
-  stopPrice?: number;
-  fillPrice?: number;
-  filledValue?: number;
-  status: string;
-  dateCreated?: string;
-  dateExecuted?: string;
-  dateModified?: string;
+type T212OrderWrapper = {
+  order: {
+    id: number | string;
+    type?: string;
+    ticker: string;
+    status: string;
+    side?: 'BUY' | 'SELL';
+    value?: number;
+    filledValue?: number;
+    currency?: string;
+    createdAt?: string;
+    strategy?: string;
+    initiatedFrom?: string;
+    instrument?: { ticker?: string; name?: string; isin?: string };
+  };
+  fill?: {
+    id: number | string;
+    quantity?: number;
+    price?: number;
+    type?: string;
+  };
 };
 
 export type OrderBackfillResult = {
@@ -110,26 +115,33 @@ export async function backfillTrading212Orders(
         `T212 orders ${host} returned ${res.status}: ${body.slice(0, 160)}`,
       );
     }
-    const data = (await res.json()) as { items?: T212Order[]; nextPagePath?: string | null };
+    const data = (await res.json()) as { items?: T212OrderWrapper[]; nextPagePath?: string | null };
     const items = data.items ?? [];
     if (items.length === 0) break;
 
-    for (const o of items) {
+    for (const wrapper of items) {
       total++;
-      if (sample === null) sample = o;
+      if (sample === null) sample = wrapper;
 
-      // Only the filledQuantity field is the real signal — status strings
-      // vary across order types. If the order partially or fully filled
-      // we want it; if it didn't fill at all (cancelled/rejected/pending),
-      // filledQuantity will be 0 or missing.
-      const qty = Number(o.filledQuantity ?? 0);
-      if (!Number.isFinite(qty) || qty === 0) {
-        bump(`unfilled (${o.status ?? 'no-status'})`);
+      const o = wrapper.order;
+      const f = wrapper.fill;
+      if (!o) {
+        bump('no-order');
+        continue;
+      }
+      if (o.status !== 'FILLED') {
+        bump(`status:${o.status ?? 'unknown'}`);
         continue;
       }
 
-      const externalId = String(o.fillId ?? o.id ?? '').replace(/^(undefined|null)$/, '');
-      if (!externalId) {
+      const qty = Number(f?.quantity ?? 0);
+      if (!Number.isFinite(qty) || qty === 0) {
+        bump('no-fill-qty');
+        continue;
+      }
+
+      const externalId = String(f?.id ?? o.id ?? '');
+      if (!externalId || externalId === 'undefined' || externalId === 'null') {
         bump('no-id');
         continue;
       }
@@ -138,17 +150,19 @@ export async function backfillTrading212Orders(
         continue;
       }
 
-      const symbol = (o.ticker ?? '').split('_')[0].toUpperCase();
+      const rawTicker = (o.ticker ?? o.instrument?.ticker ?? '').split('_')[0];
+      // T212 appends a class-letter to UCITS share classes (QUTMd, VWCEd, XLKSm).
+      // Strip a single trailing lowercase letter so it matches our assets table.
+      const symbol = rawTicker.replace(/[a-z]$/, '').toUpperCase();
       if (!symbol) {
         bump('no-ticker');
         continue;
       }
 
-      const side = qty < 0 ? 'sell' : 'buy';
-      const absQty = Math.abs(qty);
-      const price = Number(o.fillPrice ?? o.limitPrice ?? 0);
-      const total_value = Number(o.filledValue ?? absQty * price);
-      const date = o.dateExecuted ?? o.dateModified ?? o.dateCreated;
+      const side = o.side === 'SELL' ? 'sell' : 'buy';
+      const price = Number(f?.price ?? 0);
+      const filledValue = Number(o.filledValue ?? o.value ?? qty * price);
+      const date = o.createdAt;
       if (!date) {
         bump('no-date');
         continue;
@@ -159,14 +173,14 @@ export async function backfillTrading212Orders(
         asset_id: assetIdBySymbol.get(symbol) ?? null,
         type: side,
         symbol,
-        quantity: absQty,
+        quantity: qty,
         price_per_unit: price || null,
-        total_value: Math.abs(total_value),
-        currency: 'EUR',
+        total_value: Math.abs(filledValue),
+        currency: o.currency ?? 'EUR',
         fees: 0,
         transaction_date: new Date(date).toISOString(),
         tax_lot_id: externalId,
-        notes: `t212-backfill:${o.type ?? 'order'}`,
+        notes: `t212-backfill:${o.type ?? 'order'}${o.initiatedFrom ? `:${o.initiatedFrom}` : ''}`,
       });
       if (error) {
         bump(`insert-error: ${error.message.slice(0, 60)}`);
