@@ -28,6 +28,7 @@ export type OrderBackfillResult = {
   skipped: number;
   total: number;
   relinked?: number;
+  recomputed?: number;
   rateLimited?: boolean;
   more?: boolean;
   reasons?: Record<string, number>;
@@ -107,36 +108,52 @@ export async function backfillTrading212Orders(
   };
   let sample: unknown = null;
 
-  // Re-link any prior backfill transactions that landed without asset_id
-  // because of an earlier symbol-mismatch bug. Match by exact uppercase,
-  // by stripping a trailing class-letter on either side, or by prefix.
+  // Heal previous backfill rows: relink missing asset_ids, and recompute
+  // total_value where it was wrongly stored as the order-level total
+  // (multi-fill orders had each fill row inflated to the whole order's value).
   let relinked = 0;
-  const { data: orphans } = await supabase
+  let recomputed = 0;
+  const { data: priorRows } = await supabase
     .from('transactions')
-    .select('id, symbol')
+    .select('id, symbol, quantity, price_per_unit, total_value, asset_id')
     .eq('user_id', userId)
-    .is('asset_id', null)
     .like('notes', 't212-backfill%');
-  for (const tx of orphans ?? []) {
-    if (!tx.symbol) continue;
-    const upper = String(tx.symbol).toUpperCase();
-    let assetId =
-      assetIdBySymbol.get(upper) ??
-      assetIdBySymbol.get(upper.replace(/[A-Z]$/, ''));
-    if (!assetId) {
-      for (const [k, v] of assetIdBySymbol) {
-        if (k === upper || k.startsWith(upper) || upper.startsWith(k)) {
-          assetId = v;
-          break;
+  for (const tx of priorRows ?? []) {
+    const updates: Record<string, unknown> = {};
+
+    if (!tx.asset_id && tx.symbol) {
+      const upper = String(tx.symbol).toUpperCase();
+      let assetId =
+        assetIdBySymbol.get(upper) ??
+        assetIdBySymbol.get(upper.replace(/[A-Z]$/, ''));
+      if (!assetId) {
+        for (const [k, v] of assetIdBySymbol) {
+          if (k === upper || k.startsWith(upper) || upper.startsWith(k)) {
+            assetId = v;
+            break;
+          }
         }
       }
+      if (assetId) updates.asset_id = assetId;
     }
-    if (assetId) {
-      const { error: linkErr } = await supabase
+
+    if (tx.quantity != null && tx.price_per_unit != null) {
+      const expected = Math.abs(Number(tx.quantity) * Number(tx.price_per_unit));
+      const current = Math.abs(Number(tx.total_value ?? 0));
+      if (expected > 0 && Math.abs(expected - current) > 0.01) {
+        updates.total_value = expected;
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      const { error: updErr } = await supabase
         .from('transactions')
-        .update({ asset_id: assetId })
+        .update(updates)
         .eq('id', tx.id);
-      if (!linkErr) relinked++;
+      if (!updErr) {
+        if (updates.asset_id) relinked++;
+        if (updates.total_value !== undefined) recomputed++;
+      }
     }
   }
 
@@ -207,7 +224,10 @@ export async function backfillTrading212Orders(
 
       const side = o.side === 'SELL' ? 'sell' : 'buy';
       const price = Number(f?.price ?? 0);
-      const filledValue = Number(o.filledValue ?? o.value ?? qty * price);
+      // Use per-fill value (qty * price). order.filledValue is the whole
+      // order's total and would inflate each row when an order has >1 fill.
+      const filledValue =
+        price > 0 ? qty * price : Number(o.filledValue ?? o.value ?? 0);
       const date = o.createdAt;
       if (!date) {
         bump('no-date');

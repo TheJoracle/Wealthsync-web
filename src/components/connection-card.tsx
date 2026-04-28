@@ -94,6 +94,7 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
           `${data.inserted} transacties geïmporteerd uit ${data.total} orders`,
           data.skipped ? `${data.skipped} overgeslagen` : null,
           data.relinked ? `${data.relinked} bestaande transacties gekoppeld aan asset` : null,
+          data.recomputed ? `${data.recomputed} bedragen gecorrigeerd` : null,
         ]
           .filter(Boolean)
           .join(' · ');
