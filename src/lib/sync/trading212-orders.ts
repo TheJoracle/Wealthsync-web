@@ -27,11 +27,27 @@ export type OrderBackfillResult = {
   inserted: number;
   skipped: number;
   total: number;
+  relinked?: number;
   rateLimited?: boolean;
   more?: boolean;
   reasons?: Record<string, number>;
   sample?: unknown;
 };
+
+// T212 tickers come in like "VWCEd_EQ" or "QUTMd_EQ". The position-sync
+// flow uppercased without stripping (asset stored as "VWCED"), but a
+// backfill-only flow might want the bare symbol "VWCE". Resolve to whatever
+// already exists in the assets table; only fall back to a normalized form
+// if nothing matches.
+function pickSymbolFor(rawTicker: string, knownSymbols: Map<string, number>): string {
+  const base = (rawTicker.split('_')[0] ?? '').trim();
+  if (!base) return '';
+  const upperAsIs = base.toUpperCase();
+  if (knownSymbols.has(upperAsIs)) return upperAsIs;
+  const stripped = base.replace(/[a-z]$/, '').toUpperCase();
+  if (stripped && knownSymbols.has(stripped)) return stripped;
+  return upperAsIs;
+}
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -90,6 +106,39 @@ export async function backfillTrading212Orders(
     skipped++;
   };
   let sample: unknown = null;
+
+  // Re-link any prior backfill transactions that landed without asset_id
+  // because of an earlier symbol-mismatch bug. Match by exact uppercase,
+  // by stripping a trailing class-letter on either side, or by prefix.
+  let relinked = 0;
+  const { data: orphans } = await supabase
+    .from('transactions')
+    .select('id, symbol')
+    .eq('user_id', userId)
+    .is('asset_id', null)
+    .like('notes', 't212-backfill%');
+  for (const tx of orphans ?? []) {
+    if (!tx.symbol) continue;
+    const upper = String(tx.symbol).toUpperCase();
+    let assetId =
+      assetIdBySymbol.get(upper) ??
+      assetIdBySymbol.get(upper.replace(/[A-Z]$/, ''));
+    if (!assetId) {
+      for (const [k, v] of assetIdBySymbol) {
+        if (k === upper || k.startsWith(upper) || upper.startsWith(k)) {
+          assetId = v;
+          break;
+        }
+      }
+    }
+    if (assetId) {
+      const { error: linkErr } = await supabase
+        .from('transactions')
+        .update({ asset_id: assetId })
+        .eq('id', tx.id);
+      if (!linkErr) relinked++;
+    }
+  }
 
   for (let page = 0; page < MAX_PAGES_PER_CALL; page++) {
     if (page > 0) await sleep(PAGE_DELAY_MS);
@@ -150,10 +199,7 @@ export async function backfillTrading212Orders(
         continue;
       }
 
-      const rawTicker = (o.ticker ?? o.instrument?.ticker ?? '').split('_')[0];
-      // T212 appends a class-letter to UCITS share classes (QUTMd, VWCEd, XLKSm).
-      // Strip a single trailing lowercase letter so it matches our assets table.
-      const symbol = rawTicker.replace(/[a-z]$/, '').toUpperCase();
+      const symbol = pickSymbolFor(o.ticker ?? o.instrument?.ticker ?? '', assetIdBySymbol);
       if (!symbol) {
         bump('no-ticker');
         continue;
@@ -202,5 +248,5 @@ export async function backfillTrading212Orders(
     if (page === MAX_PAGES_PER_CALL - 1) more = true;
   }
 
-  return { inserted, skipped, total, rateLimited, more, reasons, sample };
+  return { inserted, skipped, total, relinked, rateLimited, more, reasons, sample };
 }
