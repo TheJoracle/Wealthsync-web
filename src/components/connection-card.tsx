@@ -101,13 +101,17 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
           : data.more
             ? ' — Er zijn nog oudere orders, klik nogmaals om verder te gaan.'
             : '';
-        // If 0 inserted and we have skip reasons, show a quick breakdown
+        // If 0 inserted and we have skip reasons, show a quick breakdown.
+        // Also dump the first raw order so we can see what fields T212 actually returns.
         let debug = '';
         if (data.inserted === 0 && data.reasons) {
           const reasonStr = Object.entries(data.reasons as Record<string, number>)
             .map(([k, v]) => `${v}× ${k}`)
             .join(', ');
           debug = `\n\nReden van overslaan: ${reasonStr}`;
+        }
+        if (data.inserted === 0 && data.sample) {
+          debug += `\n\nVoorbeeld-order vanuit T212:\n${JSON.stringify(data.sample, null, 2).slice(0, 600)}`;
         }
         setInfo(parts + tail + debug);
       }
