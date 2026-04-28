@@ -93,7 +93,8 @@ export function ConnectionCard({ platform, connected, lastSync, lastError }: Pro
         const parts = [
           `${data.inserted} transacties geïmporteerd uit ${data.total} orders`,
           data.skipped ? `${data.skipped} overgeslagen` : null,
-          data.relinked ? `${data.relinked} bestaande transacties gekoppeld aan asset` : null,
+          typeof data.scanned === 'number' ? `${data.scanned} bestaande T212-rijen gescand` : null,
+          data.relinked ? `${data.relinked} gekoppeld aan asset` : null,
           data.recomputed ? `${data.recomputed} bedragen gecorrigeerd` : null,
         ]
           .filter(Boolean)
