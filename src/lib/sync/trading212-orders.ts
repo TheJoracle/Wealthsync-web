@@ -29,6 +29,7 @@ export type OrderBackfillResult = {
   total: number;
   relinked?: number;
   recomputed?: number;
+  scanned?: number;
   rateLimited?: boolean;
   more?: boolean;
   reasons?: Record<string, number>;
@@ -117,7 +118,8 @@ export async function backfillTrading212Orders(
     .from('transactions')
     .select('id, symbol, quantity, price_per_unit, total_value, asset_id')
     .eq('user_id', userId)
-    .like('notes', 't212-backfill%');
+    .like('notes', 't212-%');
+  const scanned = priorRows?.length ?? 0;
   for (const tx of priorRows ?? []) {
     const updates: Record<string, unknown> = {};
 
@@ -268,5 +270,5 @@ export async function backfillTrading212Orders(
     if (page === MAX_PAGES_PER_CALL - 1) more = true;
   }
 
-  return { inserted, skipped, total, relinked, rateLimited, more, reasons, sample };
+  return { inserted, skipped, total, relinked, recomputed, scanned, rateLimited, more, reasons, sample };
 }
