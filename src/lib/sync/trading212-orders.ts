@@ -29,11 +29,8 @@ export type OrderBackfillResult = {
   total: number;
   relinked?: number;
   recomputed?: number;
-  scanned?: number;
   rateLimited?: boolean;
   more?: boolean;
-  reasons?: Record<string, number>;
-  sample?: unknown;
 };
 
 // T212 tickers come in like "VWCEd_EQ" or "QUTMd_EQ". The position-sync
@@ -102,12 +99,6 @@ export async function backfillTrading212Orders(
   let cursor: string | null = null;
   let rateLimited = false;
   let more = false;
-  const reasons: Record<string, number> = {};
-  const bump = (k: string) => {
-    reasons[k] = (reasons[k] ?? 0) + 1;
-    skipped++;
-  };
-  let sample: unknown = null;
 
   // Heal previous backfill rows: relink missing asset_ids, and recompute
   // total_value where it was wrongly stored as the order-level total
@@ -119,7 +110,6 @@ export async function backfillTrading212Orders(
     .select('id, symbol, quantity, price_per_unit, total_value, asset_id')
     .eq('user_id', userId)
     .like('notes', 't212-%');
-  const scanned = priorRows?.length ?? 0;
   for (const tx of priorRows ?? []) {
     const updates: Record<string, unknown> = {};
 
@@ -189,38 +179,32 @@ export async function backfillTrading212Orders(
 
     for (const wrapper of items) {
       total++;
-      if (sample === null) sample = wrapper;
-
       const o = wrapper.order;
       const f = wrapper.fill;
-      if (!o) {
-        bump('no-order');
-        continue;
-      }
-      if (o.status !== 'FILLED') {
-        bump(`status:${o.status ?? 'unknown'}`);
+      if (!o || o.status !== 'FILLED') {
+        skipped++;
         continue;
       }
 
       const qty = Number(f?.quantity ?? 0);
       if (!Number.isFinite(qty) || qty === 0) {
-        bump('no-fill-qty');
+        skipped++;
         continue;
       }
 
       const externalId = String(f?.id ?? o.id ?? '');
       if (!externalId || externalId === 'undefined' || externalId === 'null') {
-        bump('no-id');
+        skipped++;
         continue;
       }
       if (seenIds.has(externalId)) {
-        bump('duplicate');
+        skipped++;
         continue;
       }
 
       const symbol = pickSymbolFor(o.ticker ?? o.instrument?.ticker ?? '', assetIdBySymbol);
       if (!symbol) {
-        bump('no-ticker');
+        skipped++;
         continue;
       }
 
@@ -232,7 +216,7 @@ export async function backfillTrading212Orders(
         price > 0 ? qty * price : Number(o.filledValue ?? o.value ?? 0);
       const date = o.createdAt;
       if (!date) {
-        bump('no-date');
+        skipped++;
         continue;
       }
 
@@ -251,7 +235,7 @@ export async function backfillTrading212Orders(
         notes: `t212-backfill:${o.type ?? 'order'}${o.initiatedFrom ? `:${o.initiatedFrom}` : ''}`,
       });
       if (error) {
-        bump(`insert-error: ${error.message.slice(0, 60)}`);
+        skipped++;
         continue;
       }
       seenIds.add(externalId);
@@ -270,5 +254,5 @@ export async function backfillTrading212Orders(
     if (page === MAX_PAGES_PER_CALL - 1) more = true;
   }
 
-  return { inserted, skipped, total, relinked, recomputed, scanned, rateLimited, more, reasons, sample };
+  return { inserted, skipped, total, relinked, recomputed, rateLimited, more };
 }
